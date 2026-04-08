@@ -1,0 +1,25 @@
+ R←⍙GitSwitch ⍙RA;⍙CMD;⍙TEMP;⍙WS
+⍝ Switch to a specified branch or switch to a new branch (with -c/-C
+⍝ passed as a param)
+⍝
+⍝ [TLDR: Switch branches]
+
+⍝ Syntax: R←⍙GitSwitch [PARAMS] [TEMP] [WS]
+⍝   TEMP: Temp dir for use by ⍙COMMAND
+⍝     WS: WS' parent dir
+⍝ PARAMS: branch name (required) and any other params (see git switch
+⍝         documentation for a full list).
+⍝
+⍝         For example, this line would create a branch named "hotfix"
+⍝         and switch to it:
+⍝
+⍝            ]Git Switch -c hotfix
+
+ (⍙RA ⍙TEMP ⍙WS)←⍙RA
+:if 0=⍴⍙RA~' ' ⋄ R←'SYNTAX ERROR: Missing branch name' ⋄ →0 ⋄ :endif
+⍝ Build ⎕CMD argument to pass to ∆_COMMAND
+ ⍙CMD←'git switch ',⍙RA
+⍝ Returns output from the ⎕CMD call:
+ R←⍙TEMP ⍙COMMAND ⍙WS ⍙CMD
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

@@ -1,0 +1,45 @@
+APL+Win functions and variables in .txt format (UTF-8)
+
+Syntax for writing a single object:
+
+  ]TOTXT OBJNAME
+
+  Optional params: ]TOTXT OBJNAME /P=C:\temp\ /R
+
+Syntax for writing all objects within the workspace:
+
+  ]TOTXT
+
+  This syntax always overwrites any existing ]TOTXT style text files
+  in the workspace's parent directory (i.e. /R is automatic for this
+  syntax)
+
+Creates one or more UTF-8 encoded .txt file in the current workspace's
+path or in the supplied path (/P=) containing the contents of the APL
+function or variable represented by OBJNAME called
+"{PATH}\OBJNAME.{EXT}" where {EXT} is:
+
+ - '.aplwfn' if the object is a function
+ - '.aplwcv' if the object is a character vector
+ - '.aplwvr' if the object is an APL+Win variable that is not a simple
+     character vector.
+
+If a file already exists as "{PATH}\OBJNAME.txt" and /R is provided, the
+file is overwritten, otherwise, the file is not created.
+
+If /P is provided, the path must use '\' and not '/'.
+
+If there are objects in the workspace whose names differ only in case
+(e.g. Foo and foo), case codes are automatically appended to the output
+files to allow for two objects with similar names to coexist in one
+Windows directory as they do in an APL+Win workspace.  For example,
+a workspace containing <Foo> and <foo> would produce the following
+files:
+
+  Foo-04.aplwfn
+  foo-00.aplwfn
+
+The case code suffix is an octal encoding of the object name's character
+case statuses.
+
+Returns a message stating success or failure.

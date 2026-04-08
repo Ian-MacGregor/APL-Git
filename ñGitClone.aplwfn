@@ -1,0 +1,42 @@
+ ⍙R←⍙GitClone ⍙RA;⍙ARG;⍙DEST;⍙I;⍙LDIR;⍙NAME;⍙TEMP;⍙T;⍙U;⍙URL
+⍝ Clone a GitHub repository (or other remote hosted git repository).
+
+⍝ Syntax: ⍙R←⍙GitClone '<NAME> <DEST> <URL>' ⍙TEMP
+
+⍝   NAME: Workspace name for new repository
+⍝   DEST: Destination directory (i.e. parent dir to create a new
+⍝           repository directory within
+⍝    URL: Source repository
+⍝  ⍙TEMP: Temp directory for ⍙COMMAND
+⍝     ⍙R: Success or error message
+
+⍝ Here are the steps executed by this function:
+
+⍝  1. Create a directory within the directory specified by ⍙DEST named
+⍝      ⍙NAME
+
+⍝  2. Populates the directory from step 1 with the contents of the
+⍝     remote repository (retrieved via "git clone" from ⍙URL) and
+⍝     initialize the new path as a git repository (creating a hidden
+⍝     ".git" path)
+
+⍝  3. Create a workspace within the new directory named ⍙NAME
+
+⍝  4. ]FROMTXT is executed from the new workspace to import any APL+Win
+⍝     code text files (i.e. .aplwfn, .aplwcv, and .aplwvr files) from
+⍝     the new directory into the new workspace
+
+⍝ Parse ⍙RA:
+ (⍙ARG ⍙TEMP)←⍙RA
+⍝ Repo Name; Dest to hold new repo dir; Repo to clone:
+ ⍙ARG←(1,' '=⍙ARG) ⎕PENCLOSE ' ',⍙ARG
+ ⍙T←~^\¨' '=⍙ARG ⋄ (⍙NAME ⍙DEST ⍙URL)←⍙T ⎕REPL¨⍙ARG
+⍝ Add trailing '\' if missing:
+ ⍙DEST←⍙DEST,(('\'≠¯1↑⍙DEST)/'\')
+⍝ "git clone" the repo into specified dest:
+ ⍙T←'git clone ',⍙URL
+ ⍙R←⍙TEMP ⍙COMMAND ⍙DEST ⍙T
+⍝ Use an ActiveX server to run APL+Win and save a new workspace after
+⍝ importing any APL+Win codefiles:
+ ⍙U←⍙DEST,⍙NAME ⋄ ⍙T←⍙U,'\',⍙NAME
+ ⍙R←⎕UCMD 'SERVER "⎕UCMD ',"'FROMTXT /P=",⍙U,"' ⋄ ⎕SAVE '",⍙T,"'"," ⋄ ⍙RESULT←'",⍙T," workspace successfully created!'"

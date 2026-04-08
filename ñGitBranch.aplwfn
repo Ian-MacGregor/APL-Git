@@ -1,0 +1,20 @@
+ R←⍙GitBranch RA;C;NAME;PDIR;TEMP
+⍝ Manage the list of branches in local repo.
+
+⍝ Syntaxes:
+⍝ ⍙R←⍙GitBranch '' ⍙TEMP ⍙PDIR - Show current list of branches
+
+⍝ ⍙R←⍙GitBranch '<NewBranchName>' ⍙TEMP ⍙PDIR - Add a branch
+
+⍝ Requires: ⍙COMMAND
+
+⍝ Parse ⍙RA:
+⍝ 1⊃ Call name and params (e.g. 'Add MyRepo github.com/myname/myrepo')
+⍝ 2⊃ Temp dir for ⍙COMMAND
+⍝ 3⊃ WS's parent directory (must contain .git hidden folder from init/clone)
+ (NAME TEMP PDIR)←RA
+ C←'git branch' ⍝ list branches
+:if 0≠⍴NAME ⋄ C←C,' ',NAME ⋄ :endif ⍝ New branch?
+ R←TEMP ⍙COMMAND PDIR C
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

@@ -1,0 +1,484 @@
+APL+Win and Git interface tool
+   As of 3/12/2026
+
+This tool is for maintaining APL+Win code using Git from APL+Win,
+no command line Git interaction required.  This tool calls the "Git"
+Windows Application and thus requires that Git is installed before
+this tool can work.
+
+Git can be downloaded from:
+
+  https://git-scm.com/downloads
+
+Here is a Git command cheat sheet:
+
+  https://education.github.com/git-cheat-sheet-education.pdf
+
+This cheat sheet is only needed if you are interacting with Git via
+command line and not this user command.  However, seeing how Git is
+designed to function natively may improve understanding of this
+user command as this command is essentially an APL+Win cover function
+for the Git command line interface.
+
+Tool Syntax: ]Git [Action] {Object}
+
+[Action] is always required and defines the Git interaction to be
+executed (see full list below).
+
+The workflow for managing a codebase with ]Git is not quite the same
+as managing code using Git in Visual Studio or via the Git Windows
+command line tool but it is roughly analagous.  Once you are managing
+a repository with ]Git, the daily workflow for updating a piece of code
+looks like this (for a well behaved, slightly obsessive programmer who
+does lots of "Diffs" to check their changes along the way):
+
+ ]Git Fetch | Grab the info about the latest changes
+ ]Git Diff origin/master | Compare changes that haven't been pulled yet
+ ]Git Pull | Update the current workspace from the GitHub repo
+   -- Modify a piece of code in the workspace --
+ ]Git Add BankRpt | Update text file for BankRpt & mark it as ready to commit
+ ]Git Diff --staged | check the changes marked to commit
+ ]Git Commit "Fixed VALUE ERROR in BankRpt" | Commit the changes
+   -- Modify another piece of code in the ws --
+ ]Git Add CMIOTA | Update text file for CMIOTA & mark it as ready to commit
+ ]Git Diff --staged | check the changes marked to commit
+ ]Git Commit "Fixed a bug in CMIOTA" | Commit changes
+ ]Git Diff origin/master | Compare changes that haven't been pushed/pulled yet
+ ]Git Pull | Bring in any updates to remote repo since last pull (and auto merge)
+ ]Git Push | Update GitHub from the text files for this ws
+
+--------------------------
+Full List of ]Git Actions:
+--------------------------
+
+  ]Git Add [Objects/files]
+
+       Add a specified file to the current workspace's Git tracking.
+       The file must exist within the current workspace's parent
+       directory.  If the file name provided does not have an extension
+       it is assumed to be a reference to an APL object that
+
+       ]GIT Add /F=photo.jpg ⍝ Add a single file to this commit
+       ]GIT Add CMIOTA DTBV  ⍝ Add a two objects to this commit
+       ]Git Add .            ⍝ Add all files for this workspace to the commit
+
+       Note: Adding files (non-APL+Win objects) must be done separately from
+             adding objects (for now).
+
+       [TLDR: Tell git to track a file/object]
+
+  ]Git Branch {NewBranch}
+
+       List the local branches of the current repository
+
+       If NewBranch is provided it is the name of a new branch to be
+       created at the current commit
+
+       [TLDR: Manage branches of a repo]
+
+  ]Git Clone [NAME] [DEST] [URL]
+
+       Clone a Git repository from its URL to a specified local path
+       (DEST above).  Creates and populates a workspace within the
+       given local path (named NAME).  The workspace is populated using
+       ]FROMTXT to import any APL+Win functions or variables stored in
+       text files  (.aplwfn, .aplwcv, or .aplwvr) in the given
+       repository.
+
+       [TLDR: Download a repo, make a ws for it, import code to ws]
+
+  ]Git Commit [Message]
+
+       Add a commit to this workspace's repository containing all
+       objects marked for commiting (via ]Git Add).
+
+       Returns an error message or stats about the commit:
+
+              ]Git Commit "Conflict commit #2"
+          [master a7c92c2] Conflict commit #2
+           1 file changed, 1 insertion(+), 1 deletion(-)
+
+       [TLDR: Creates local git commit]
+
+  ]Git Diff {Params}
+
+       Show the differences in repo files for various scenarios.  With
+       no params, this command shows all unstaged changes (changes that
+       have not been ]Git Add'd yet.
+
+       Many params are available (see gits "diff" documentation for a
+       complete listing).  Examples:
+
+       Differences between two commits: ]Git Diff 1234 1235
+
+       Changes since commit: ]Git Diff 1235
+
+       Changes from remote repo: ]Git Diff origin/master
+
+       [TLDR: Compare versions of the text files for this ws]
+
+  ]Git Fetch
+
+       Update the local git repo with changes from the remote repo (does
+       not change text files or code, required to run ]Git Merge)
+
+       [TLDR: Updates git from remote repo]
+
+  ]Git Ignore [Filename]
+
+       Mark a file within the parent directory as a file that should not
+       be managed by ]Git.  The first time this call is run for a
+       repository, a "gitignore" file is created in the repository to
+       keep track of the ignored files.  Subsequent ]Git Ignore calls
+       will update the existing gitignore file.  [Filename] includes
+       the extension but not filepath required.  After using this call,
+       the gitignore file will need to be added, commited and then pushed
+       via ]Git Add, ]Git Commit and ]Git Push.
+
+       Returns the updated contents of the .gitignore file
+
+       Otherwise, returns an error message.
+
+       [TLDR: Tell git not to track a file]
+
+     NOTE: If file already being tracked (i.e. committed at least once),
+     then .gitignore will not stop Git from tracking it (will need to remove it
+     first via ]Git Remove then add it to .gitignore)
+
+  ]Git Init
+
+       Initialize parent directory of current ws as a Git repository
+       (named after the ws).  This call creates a hidden ".git" folder
+       in the source workspace's parent directory to hold Git
+       information, this folder is mananged entirely by Git and not
+       by any APL+Win code.
+
+       In order for any of the following calls to succeed (with the
+       exception of ]Git Clone), they must be run from a workspace
+       within a directory that contains a hidden ".git" directory
+       (created via this call, ]Git Clone, or by using Git from the
+       command line or another interface).
+
+       [TLDR: Makes the current directory a local git repo]
+
+  ]Git Log {Params}
+
+       Show all commits for this repo (just like the "git log" Windows
+       command).  Result looks like:
+
+         commit f62bf37965f12c76869a63b6771725c5b5aa4f01 (HEAD -> master, GitDemo/master)
+         Author: Ian MacGregor <ian@zarkapl.com>
+         Date:   Wed Jul 9 14:34:32 2025 -0400
+
+             Added a bad comment
+
+         commit 948cd33b19cdad08c0ff8527ef6a4fa3b9042053
+         Author: Ian MacGregor <ian@zarkapl.com>
+         Date:   Wed Jul 9 14:28:19 2025 -0400
+
+             first commit adding a function and a variable
+
+       If {Params} is passed, it should be a string to pass to the
+       command line after "git log ". E.g. to see the history of a
+       specific file in the repo, you would pass "--follow [filename]"
+       which would execute "git log --follow [filename]" to show the
+       history of a specific file.
+
+       [TLDR: Show history of a repo or file]
+
+  ]Git Merge {Params}
+
+       Merge fetched changes.  If auto-merge fails, merge confilct
+       indicators are left in the text files where merge confilcts
+       exist like this:
+
+         <<<<<<< HEAD
+         This is the text on the main branch.
+         =======
+         This is the incoming text from the feature branch.
+         >>>>>>> feature-branch
+
+       Resolve the confilcts in code and do a ]Git Add <OBJ> to
+       mark the confilct resolved, then commit and push.
+
+  ]Git Pull
+
+       Fetch all changes, merge them (automatically if possible),
+       and update the text files for this repo.
+
+       [TLDR: Updates workspace and local text files from repo]
+
+  ]Git Push {Params}
+
+       Push any not-yet-pushed commits for this repository to the
+       associated GitHub repo
+
+       Only on the very first push to a branch do params need to
+       be passed (to set the upstream target from your branch):
+
+         ]Git Push -u origin master
+
+       [TLDR: Updates repo from local text files]
+
+  ]Git Remote {Sub-action} {Params}
+
+      Show list of current branch/repo URL/alias mappings:
+
+        ]Git Remote
+
+      Add an alias for a remote URL:
+
+        ]Git Remote Add [Alias] [URL]
+
+      Remove an alias mapping:
+
+        ]Git Remote Remove [Alias]
+
+      Rename an alias:
+
+        ]Git Remote Rename [OldAlias] [NewAlias]
+
+      [TLDR: Assign aliases to remote branches/repos and manage mappings]
+
+  ]Git Remove [Filename]
+
+      Delete the specified file, staging this change (i.e. delete the
+      local file, the repo file will be removed with the next commit
+      and push).
+
+      There is no tool for removing an object from an APL+Win workspace
+      and deleting the related text file in one step.  This can be
+      achieved using ⎕ERASE and then ]Git Remove sequentially.
+
+      [TLDR: Erase a file and track the change]
+
+  ]Git Reset {Filename}
+
+       Unstage all changes currently staged or all staged changes to
+       a particular file {Filename}.
+
+       [TLDR: Whoops, these changes aren't ready to be committed!]
+
+  ]Git Restore [Filename/params]
+
+       Restore a particular file (or files) to a specific branch or
+       commit (many params available - see git restore documentation)
+
+       Note git restore and git switch together replace git checkout
+
+       [TLDR: Restore old code]
+
+  ]Git Stash [Action] {Message}  *** UNDER CONSTRUCTION ***
+
+       [TLDR: Manage temporary "stashed" changes]
+
+  ]Git Switch [Branch/params]
+
+       Switch branches (many params available - see git switch
+       documentation)
+
+       Note git restore and git switch together replace git checkout
+
+       [TLDR: Switch branches]
+
+  ]Git Status
+
+       Return the Git status of the current workspace's Git managed
+       directory (i.e. a list of altered files).  Equivalent to the
+       "git status" Windows command.
+
+-----------
+Using ]GIT:
+-----------
+
+ Starting requirements:
+   - Git must be installed on the developer's machine (part of the
+     installation involves linking Git to an active GitHub account
+     for managing remote repositories)
+
+   - The user commands for GIT and its tools must be accessible
+     (]GIT, ]TOTXT, & ]FROMTXT).  These can be installed by downloading
+     the ready-built APL+Win user command file for ]GIT (GITCMDS.sf)
+     and then running this line in APL+Win:
+
+       ]UFILE C:\path\to\GITCMDS
+
+     Or, you can download the GIT_NN.w3 workspace and ]USAVE the
+     the following objects in whatever user command file you desire:
+
+     For ]GIT:
+
+     CMDGIT
+     DATEPLUS
+     GIT∆DOC
+     GRPCMDGIT
+     ⍙COMMAND
+     ⍙GitAdd
+     ⍙GitBranch
+     ⍙GitClone
+     ⍙GitCommit
+     ⍙GitDiff
+     ⍙GitFetch
+     ⍙GitIgnore
+     ⍙GitInit
+     ⍙GitLog
+     ⍙GitMerge
+     ⍙GitPull
+     ⍙GitPush
+     ⍙GitRemote
+     ⍙GitRemove
+     ⍙GitReset
+     ⍙GitRestore
+     ⍙GitStatus
+     ⍙GitSwitch
+
+     For ]TOTXT & ]FROMTXT (required for ]GIT):
+
+     APL2TXT
+     CMDFROMTXT
+     CMDTOTXT
+     FROMTXT∆DOC
+     GRPCMDFROMTXT
+     GRPCMDTOTXT
+     TOTXT∆DOC
+     TXT2APL
+
+   - If you are going to maintain an existing APL+Win workspace, you
+     must place that workspace in its own directory (with the same name
+     as the workspace).  For example, if you wish to manage a workspace
+     called "C:\Workspace\MyCode.w3" you should place it in a diretory
+     called "C:\Workspace\MyCode\" such that the fully qualified name of
+     the workspace is "C:\Workspace\MyCode\MyCode.w3". If you are
+     cloning an existing GitHub repository (or another Git repository
+     source) via the "]Git Clone" command below, an appropriate
+     directory and set of source files will be created automatically.
+
+ Moving Existing Workspace to GitHub:
+
+   1. Create a new, empty, repository on your GitHub account (must
+      be done via the web at https://github.com/ or you can install the
+      GitHub command line tool)
+
+   2. Move the workspace to its own directory and )LOAD/)XLOAD it. For
+      example, if you wish to manage a workspace called
+      "C:\Workspace\MyCode.w3" you should place it in a diretory called
+      "C:\Workspace\MyCode\" such that the fully qualified name of the
+      workspace is "C:\Workspace\MyCode\MyCode.w3".
+
+   3. Run "]Git Init" from the workspace.  This command creates a hidden
+      subfolder ".git" in the workspace's parent directory.
+
+   4. Associate the workspace path with your empty repository from step
+      number 1:
+
+       ]Git Remote origin <URL>
+
+      <URL> should be something like:
+
+      https://github.com/user-name/your-repo.git
+
+   5. Add your workspace's code to the first git commit (period implies
+      all objects in the workspace):
+
+       ]Git Add .
+
+   6. Create an initial commit to the freshly associated repo:
+
+       ]Git Commit "Initial commit"
+
+   7. Push the initial commit to the GitHub repo and label it as the
+      upstream target for future pushes.  'origin' can be anything so
+      long as it matches the name used for ]Git Remote and 'master'
+      just needs to match your git branch name (master is default):
+
+       ]Git Push -u origin master
+
+      After executing the above once, all future pushes to this branch
+      (master or main if you don't add branches) can be achieved with
+      a simple "]Git Push".
+
+   8. Modify and maintain the new repository per the instructions
+      below (see the "Modifying and Maintaining Code With ]Git:"
+      section).
+
+ Cloning an Existing GitHub Repository:
+
+   1. Run the "]Git Clone" command specifying the source URL of the
+      GitHub repo and the parent directory to create a cloned directory
+      within:
+
+        ]Git Clone "https://www.GitHub.com/User/Repo" "C:\Workspace\"
+
+      The above command does the following:
+
+        - Creates a directory called "C:\Workspace\Repo\"
+
+        - Populates the above directory with all the files in the
+          GitHub Repo
+
+        - Creates a workspace in the directory called:
+            "C:\Workspace\Repo\Repo.w3"
+
+        - )XLOAD's the above workspace
+
+        - Executes ]FROMTXT to import any APL+Win objects from the
+          GitHub repo into the new workspace
+
+        - )SAVE's the updated workspace
+
+   2. Modify and maintain the new repository per the instructions
+      below.
+
+ Modifying and Maintaining Code With ]Git:
+
+   1. )XLOAD/)LOAD a workspace that is set up to be maintained with ]Git
+      (per the instructions above)
+
+   2. "]Git Fetch" to make git aware of any remote changes to this
+      branch/workspace
+
+   3. "]Git Diff origin/master" to see what has changed in the remote
+      repo compared to your local path
+
+   3. Once you are satisfied with the new code, execute "]Git Pull"
+      to update both your workspace and local text files with the repo
+      code
+
+   4. Modify the code as needed.
+
+   5. Stage the chaged code for a commit:
+
+        ]Git Add CMIOTA
+
+   6. Create a commit with a helpful message for each modification like
+      so:
+
+        ]Git Commit "Added a comment to CMIOTA"
+
+   6. Check your changes:
+
+        ]Git Diff origin/master
+
+   7. If you spot an issue or mistake, fix it and create another commit.
+      Once everything looks good, push your commits with "]Git Push".
+
+      If this command results in an error saying that there have been
+      changes to the repo since your last pull, execute a "]Git Pull"
+      to get the updated code and attempt an auto merge.  If the auto
+      merge works, just "]Git Push".  If the auto merge fails, it will
+      leave merge confilct markers in the text files indicating
+      confilcts that need resolution.  They look like this:
+
+        <<<<<<< HEAD
+        This is the text on the main branch.
+        =======
+        This is the incoming text from the feature branch.
+        >>>>>>> feature-branch
+
+      Once the conflicts are fixed (via editing the text files or
+      by changing code), mark the conflict as resolved with
+      a ]Git Add:
+
+           ]Git Add <FunctionName>
+
+      Then commit them and do another "]Git Push".

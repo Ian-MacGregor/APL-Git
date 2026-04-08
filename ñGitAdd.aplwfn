@@ -1,0 +1,36 @@
+ R←⍙GitAdd ⍙RA;⍙CMD;⍙F;⍙PDIR;⍙T;⍙U;⍙V;⍙TEMP
+⍝ Add a specified file to the current workspace's Git tracking.
+⍝ The file must exist within the current workspace's parent
+⍝ directory.  If the file name provided does not have an extension
+⍝ it is assumed to be a reference to an APL object that
+⍝
+⍝ ]GIT Add /F=photo.jpg ⍝ Add a single file to this commit
+⍝ ]GIT Add CMIOTA DTBV  ⍝ Add a two objects to this commit
+⍝ ]Git Add .            ⍝ Add all files for this workspace to the commit
+⍝
+⍝ Note: Adding files (non-APL+Win objects) must be done separately from
+⍝       adding objects (for now).
+⍝
+⍝ [TLDR: Tell git to track a file/object]
+
+⍝ Get workspace path
+ (⍙RA ⍙TEMP ⍙PDIR)←⍙RA ⍝ ⍙RA: Objects; ⍙TEMP: TempPath; ⍙PDIR: Parent dir
+⍝ Update the workspace path's text files:
+:If '.'≡↑⍙RA~' ' ⋄ ⍙T←⎕UCMD 'TOTXT' ⍝ All objects
+:ElseIf ∨/⍙T←'/F='⍷⍙RA ⋄ ⍙RA←3↓(∨\⍙T)/⍙RA ⍝ Specific file
+:Else ⍝ Specific object(s) {need to run ]TOTXT then git add the files}
+   ⍙T←⎕UCMD 'TOTXT ',⍙RA,' /R'
+  ⍝ Parse ]TOTXT result to determine created files:
+  ⍝ ]TOTXT Foo Goo → '"C:\TEMP\Foo.aplwcv" created.',⎕TCNL,'"C:\TEMP\Goo.aplwcv" created.'
+   ⍙U←∨/'created'⍷⊃⍙V←(1,¯1↓⍙T∊⎕TCNL) ⎕PENCLOSE ⍙T
+  ⍝ Drop the 'created.' portion of each result:
+   ⍙V←¯10↓¨⍙U/⍙V
+  ⍝ Take the file name from each result:
+   ⍙RA←(1+-(⌽¨⍙V)⍳¨'\')↑¨⍙V
+   ⍙RA←¯1↓∊⍙RA,¨' '
+:EndIf
+ ⍙CMD←'git add ',⍙RA
+⍝ Returns output from the ⎕CMD call:
+ R←⍙TEMP ⍙COMMAND ⍙PDIR ⍙CMD
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

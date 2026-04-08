@@ -1,0 +1,80 @@
+ CMDFROMTXT ⍙RA;⍙C;⍙E;⍙I;⍙N;⍙P;⍙O;⍙T;⍙U;⍙V;⎕ELX;⎕IO
+⍝ APL+Win user command ]FROMTXT
+⍝ Read from a text file containing the given variable or function in
+⍝ UTF-8 encoding and define the read object in the current workspace.
+⍝ The file name will be the provided object name and an extension
+⍝ corresponding to the contained object's type:
+
+⍝ - '.aplwfn' if the object is a function
+⍝ - '.aplwcv' if the object is a character vector
+⍝ - '.aplwvr' if the object is an APL+Win variable that is not a simple
+⍝     character vector.
+
+⍝ Filepath can be provided with /P but must use '\' and not '/'.  If /P
+⍝ is not provided, text file is read from the current workspace's parent
+⍝ file path.  If /R is provided and the object exists in the current
+⍝ workspace, the object definition is overwritten.  Returns status
+⍝ message (success or failure).  If /P= is provided, no objects are
+⍝ provided, and the workspace is empty, all eligible text files in the
+⍝ given path (/P) are imported (i.e. you can fill an clear ws from a
+⍝ directory filled with APL+Win text files with ]FROMTXT /P='C:\REPO')
+
+ ⎕IO←1 ⋄ ⍙E←⎕ELX ⍝ Pass-through localization of ⎕ELX
+⍝ Input path (or ''):
+:if 1∊⍙T←⍙RA ⎕SS '/P=' ⋄ ⍙T←3↓(∨\⍙T)/⍙RA ⋄ ⍙P←(^\⍙T≠' ')/⍙T ⋄ :else ⋄ ⍙P←'' ⋄ :endif
+⍝ Object name (or ''):
+ ⍙N←' '≠⍙T←(^\⍙RA≠'/')/⍙RA ⋄ ⍙N←((∨\⍙N)^⌽∨\⌽⍙N)/⍙T
+:If 0≠⍴⍙N ⍝ Object given?
+   ⍙T←⍙P TXT2APL ⍙N (1∊⍙RA ⎕SS '/R') ⍝ Overwrite existing file?
+:Else ⍝ No object name → Write all objects in path (given path or ws
+  ⍝ parent path) to the current workspace.
+  :If 0=⍴⍙P ⍝ No path passed? Use workspace's parent dir
+    :If 0≠⍴⍙P←⎕WSID ⍝ Not a clear ws?
+      ⍝ Logic from <TODOS> for dealing with APL+Win Lib No.s:
+      :If ↑⎕VI ⍙P ⍝ File with APL library number?
+         ⍙P←(-¯1+(⌽⍙P)⍳' ')↓⍙P ⍝ Path num before ws name
+        ⍝ Delete lib no. and trailing blanks (allow for '18 XYZ\3M42A.PRN'):
+         ⍙T←⍙P=' ' ⋄ ⍙P←(-+/^\⌽⍙T)↓(1<+\2>/1,⍙T)/⍙P
+         ⍙U←↑⎕FI ⍙P ⋄ ⍙T←⌊0⌈⍙U⌊2147483647 ⋄ ⍙V←⎕LIBD ⍙T
+        ⍝ If lib no. invalid or not found, use {currentdir}; handle 'D:':
+        :If ⍙U≠⍙T ⋄ :OrIf 0∊⍴⍙V
+           ⍙V←⎕CHDIR ''
+        :ElseIf 0 1 ≡⍙V=':' ⋄ ⍙V←⎕CHDIR ⍙V
+        :EndIf
+         ⍙P←⍙V,('\'≠¯1↑⍙V)⍴'\' ⍝ Incl \ unless A:\ or C:\ ...
+      :Else ⋄ ⍙P←(-¯1+(⌽⎕WSID)⍳'\')↓⎕WSID ⍝ ⎕WSID not numeric lib
+      :EndIf
+    :Else ⋄ ⎕ERROR 'PROVIDE A PATH (/P=) OR RUN THIS IN A NON-CLEAR WS!'
+    :EndIf
+  :EndIf
+
+  ⍝ Now, we have a path to look for files in...
+   ⎕ELX←'⍙RESULT←⎕EM,": ",⍙P ⋄ →0' ⋄ ⍙O←⎕LIB ⍙P ⋄ ⎕ELX←⍙E ⍝ Nest of files in given dir
+   ⍙O←(⊂[2]⌽∨\' '≠⌽⍙O) ⎕REPL¨⊂[2]⍙O
+  ⍝ APL+Win object names from .aplwfn, .aplwvr, .aplwcv files:
+   ⍙I←-(⌽¨⍙O)⍳¨'.'
+   ⍙U←(⍙I↑¨⍙O)∊'.aplwfn' '.aplwcv' '.aplwvr'
+   ⍙O←(⍙U/⍙I)↓¨⍙U/⍙O
+  ⍝ Skip those objs in this list for logistical reasons:
+   ⍙T←'TXT2APL' 'CMDFROMTXT' '⍙DEB' '⍙F' '⍙FOPEN' '⍙FTNUM' '⍙GETOPT' '⍙IFERRIN' '⍙MATIOTA' '⍙MATRIFY' '⍙OUT' '⍙OVER' '⍙PDEF' '⍙PNAMES' '⍙TIEUF' '⍙UCASE' '⍙UCMD' '⍙UCMD2'
+   ⍙O←⍙O~⍙T
+
+  ⍝ Loop for each obj to define:
+   ⍙N←⍴⍙O ⋄ ⍙I←0 ⋄ ⍙T←''
+  :While ⍙N≥⍙I←⍙I+1
+    ⍝ If there are any filenames containing case codes (e.g
+    ⍝ zwRpt-04.aplwfn) use them to set the case of the object and
+    ⍝ remove them before calling <TXT2APL>:
+    :If '-'∊⍙U←⍙I⊃⍙O ⋄ ⍙C←(1+⍙V←-(⌽⍙U)⍳'-')↑⍙U ⍝ Case code as characters
+      ⍝ Drop case code from obj name, lower case everything
+       ⍙U←⎕WCALL 'CharLower' (⍙V↓⍙U)
+      ⍝ Decode octal case code to bits indicating case:
+       ⍙V←⌽((⍴⍙U)⍴2)⊤+/(⌽8*¯1+⍳⍴⍙C)×∊⎕FI¨⍙C
+      ⍝ Use case code bits to uppercase select chars:
+       (⍙V/⍙U)←⎕WCALL 'CharUpper' (⍙V/⍙U)
+    :EndIf
+    ⍝ 1: Always overwrite when writing entire ws:
+     ⍙T←⍙T,((⍙I≠1)⍴⎕TCNL),⍙P TXT2APL ⍙U 1
+  :EndWhile
+:EndIf
+ ⍙RESULT←⍙T

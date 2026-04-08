@@ -1,0 +1,17 @@
+ ⍙R←⍙GitInit ⍙RA;⍙D;⍙T;⍙U
+⍝ Execute "git init" in the workspace's parent directory to initialize
+⍝ the directory as a git managed directory.
+
+⍝ Syntax: R←⍙GitInit ParentDir
+
+⍝ Requires: ⍙COMMAND
+ (⍙T ⍙D)←⍙RA ⍝ Temp Dir; Parent Dir
+ ⍙R←⍙T ⍙COMMAND ⍙D 'git init'
+
+⍝ Create a .gitignore file as well and add the workspace to it if the
+⍝ workspace is not clear:
+:If 0≠⍴⎕WSID ⋄ ⍙T←⎕XNNUMS,⎕NNUMS ⋄ ⍙T←-((⍳⍴⍙T)∊∣⍙T)⍳0 ⍝ Find a tie
+   (⍙D,'.gitignore') ⎕XNCREATE ⍙T
+   (((1+-(⌽⎕WSID)⍳'\')↑⎕WSID),'.w3',⎕TCNL,⎕TCLF) ⎕NAPPEND ⍙T
+   ⎕NUNTIE ⍙T
+:EndIf

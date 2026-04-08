@@ -1,0 +1,26 @@
+ R←⍙GitDiff ⍙RA;⍙CMD;⍙TEMP;⍙WS
+⍝ Show differences in text files for various scenarios
+⍝
+⍝ [TLDR: Compare versions]
+
+⍝ Syntax: R←⍙GitDiff {PARAMS} [TEMP] [WS]
+⍝   TEMP: Temp dir for use by ⍙COMMAND
+⍝     WS: WS' parent dir
+⍝ PARAMS: params for more specific comparison, with no params, this call
+⍝         just shows changes to the repo's files that have not yet been
+⍝         staged (i.e. ]Git Add).
+⍝
+⍝         Examples:
+⍝          - Changes not yet staged: ]Git Diff
+⍝
+⍝          - Changes in repo since commit: ]Git Diff 1c579e828dd127528ad21af58c55bb7b78947175
+⍝
+⍝         See git's diff documentation for full param listing
+
+ (⍙RA ⍙TEMP ⍙WS)←⍙RA
+⍝ Build ⎕CMD argument to pass to ∆_COMMAND
+ ⍙CMD←'git diff ',⍙RA
+⍝ Returns output from the ⎕CMD call:
+ R←⍙TEMP ⍙COMMAND ⍙WS ⍙CMD
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

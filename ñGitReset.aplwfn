@@ -1,0 +1,13 @@
+ R←⍙GitReset ⍙RA;⍙D;⍙T;⍙U
+⍝ Execute "git reset" in the workspace's parent directory to unstage all
+
+⍝ Syntax: R←⍙GitReset ⍙RA TempDir ParentDir
+
+⍝ ⍙RA is optional, if specified it is an individual file to drop from
+⍝ the next commit.
+
+⍝ Requires: ⍙COMMAND
+ (⍙RA ⍙T ⍙D)←⍙RA ⍝ File; Temp Dir; Parent Dir
+ R←⍙T ⍙COMMAND ⍙D ('git reset ',⍙RA)
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

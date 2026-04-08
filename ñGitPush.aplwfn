@@ -1,0 +1,26 @@
+ R←⍙GitPush ⍙RA;⍙CMD;⍙TEMP;⍙WS
+
+⍝ Push any not-yet-pushed commits for this repository to the
+⍝ associated GitHub repo
+⍝
+⍝ Returns the following or an error message:
+⍝
+⍝ Successfully pushed # commits to <repository name>.
+⍝
+⍝ Where "#" is the number of commits pushed.
+⍝
+⍝ [TLDR: Updates repo from local text files]
+
+⍝ Syntax: R←⍙GitPush [PARAMS] [TEMP] [WS]
+⍝   TEMP: Temp dir for use by ⍙COMMAND
+⍝     WS: WS' parent dir
+⍝ PARAMS: Additional modifiers for the push command like those required
+⍝         for a first push from a branch (e.g. ]Git Push -u origin master)
+
+ (⍙RA ⍙TEMP ⍙WS)←⍙RA
+⍝ Build ⎕CMD argument to pass to ∆_COMMAND
+ ⍙CMD←'git push ',⍙RA
+⍝ Returns output from the ⎕CMD call:
+ R←⍙TEMP ⍙COMMAND ⍙WS ⍙CMD
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

@@ -1,0 +1,18 @@
+ R←⍙GitFetch ⍙RA;⍙CMD;⍙TEMP;⍙WS
+⍝ Retrieve information on the repo from its remote source
+⍝
+⍝ [TLDR: Pulls latest git info from remote repo]
+
+⍝ Syntax: R←⍙GitFetch [PARAMS] [TEMP] [WS]
+⍝   TEMP: Temp dir for use by ⍙COMMAND
+⍝     WS: WS' parent dir
+⍝ PARAMS: Additional modifiers for the fetch command like branches
+⍝         to fetch from/to (e.g. ]Git Fetch origin master)
+
+ (⍙RA ⍙TEMP ⍙WS)←⍙RA
+⍝ Build ⎕CMD argument to pass to ∆_COMMAND
+ ⍙CMD←'git fetch ',⍙RA
+⍝ Returns output from the ⎕CMD call:
+ R←⍙TEMP ⍙COMMAND ⍙WS ⍙CMD
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

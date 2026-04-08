@@ -1,0 +1,38 @@
+ R←⍙GitLog RA;PDIR;T;TEMP
+⍝ ]Git Log {Params}
+⍝
+⍝   - Show all commits for this repo (just like the "git log" Windows
+⍝     command).  Result looks like:
+⍝
+⍝       commit f62bf37965f12c76869a63b6771725c5b5aa4f01 (HEAD -> master, GitDemo/master)
+⍝       Author: Ian MacGregor <ian@zarkapl.com>
+⍝       Date:   Wed Jul 9 14:34:32 2025 -0400
+⍝
+⍝           Added a bad comment
+⍝
+⍝       commit 948cd33b19cdad08c0ff8527ef6a4fa3b9042053
+⍝       Author: Ian MacGregor <ian@zarkapl.com>
+⍝       Date:   Wed Jul 9 14:28:19 2025 -0400
+⍝
+⍝           first commit adding a function and a variable
+⍝
+⍝   - If {Params} is passed, it should be a string to pass to the
+⍝     command line after "git log ". E.g. to see the history of a
+⍝     specific file in the repo, you would pass "--follow [filename]"
+⍝     which would execute "git log --follow [filename]" to show the
+⍝     history of a specific file.
+⍝
+⍝   - [TLDR: Show history of a repo or file]
+
+⍝ Syntax: R←⍙GitLog PARAMS TEMP PDIR
+⍝ PARAMS: Optional additional cvec to pass to "git log" command
+⍝   TEMP: Temp dir for use by ⍙COMMAND
+⍝   PDIR: WS' parent dir
+ (RA TEMP PDIR)←RA
+⍝ "git log" : Show repo history
+⍝ "git log --follow [filename]" : show file history
+⍝ "git log branchB..branchA" : show commits in branchA not in branchB
+ T←'git log ',RA
+ R←TEMP ⍙COMMAND PDIR T
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

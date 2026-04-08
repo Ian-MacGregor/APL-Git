@@ -1,0 +1,38 @@
+R←⍙GitCommit ⍙RA;⍙CMD;⍙T;⍙TEMP;⍙WS
+
+⍝ Add a commit to this workspace's repository containing all
+⍝ altered objects in the current workspace.  A short character
+⍝ vector commit message ("Message" above) is required with
+⍝ each commit.
+⍝
+⍝ This call requires that the workspace state matches that of the
+⍝ corresponding local text files (by running ]TOTXT).
+⍝
+⍝ Returns an error message or the following upon success (#### is
+⍝ the commit number):
+⍝
+⍝  Commit #### created successfully
+⍝
+⍝ [TLDR: Updates local text files, creates local git commit]
+
+⍝ Requires the user command ]TOTXT
+
+⍝ Syntax: R←⍙GitCommit [MSG] [TEMP] [PDIR]
+⍝    MSG: Message to attach to commit
+⍝   TEMP: Temp path for use by ⍙COMMAND
+⍝     WS: WS' parent directory
+
+⍝ Update all txt files to match the current workspace:
+ ⍙T←⎕UCMD 'TOTXT'
+ (⍙RA ⍙TEMP ⍙WS)←⍙RA
+
+⍝ Save the current workspace
+⍝ ⎕SAVE (1+⍴⍙WS)↓⎕WSID ⍝ No, this would save all of the user command fns too
+⍝ Consider using ]XSAVE on the objects (not the ucmds ones) in the ws
+
+⍝ Build ⎕CMD argument to pass to ∆_COMMAND
+ ⍙CMD←'git commit -m ',⍙RA
+⍝ Returns output from the ⎕CMD call:
+ R←⍙TEMP ⍙COMMAND ⍙WS ⍙CMD
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

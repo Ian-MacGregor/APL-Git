@@ -1,0 +1,398 @@
+⍙_R←⍙_PATH APL2TXT ⍙_RA;⍙_CC;⍙_DATA;⍙_E;⍙_EXT;⍙_FILE;⍙_L;⍙_NAME;⍙_NC;⍙_OBJ;⍙_OW;⍙_T;⍙_TIE;⍙_TIME;⍙_TXT;⍙_U;⍙_V;⎕IO
+⍝ Create a unicode txt file in the supplied directory (⍙_PATH) showing the
+⍝ contents of the given function or variable (where 1⊃⍙_RA=⍙_OBJ) is a cvec
+⍝ name of an object in the current workspace) in a unicode based text file
+⍝ that any text editor can understand without APL+Win.
+
+⍝ If ⍙_PATH is '', the file is created in the same path as the current ws.
+
+⍝ ⍙_OW (2⊃⍙_RA) is a bit indicating behavior if the destination text
+⍝ file exists already (1=overwrite).
+
+⍝ ⍙_CC (3⊃⍙_RA) is a bit indicating whether or not the resulting file
+⍝ should be case coded or not.  Case codes work like this (from Dyalog's
+⍝ ]LINK.CaseCode documentation):
+⍝
+⍝   HelloWorld    - has the uppercase indication
+⍝   1000010000    - which when reversed is
+⍝   0000100001    - which is binary for
+⍝   33 Base 10    - which in octal is
+⍝   41 Base 8     - so the full name including case code is:
+⍝   HelloWorld-41
+
+⍝   No case code (default): <HelloWorld> -> HelloWorld.txt
+
+⍝   With case code: <HelloWorld> -> HelloWorld-41.txt
+
+⍝ The result is a character vector message indicating success or failure.
+
+⍝                ↓⍙_PATH            ↓⍙_OBJ   ↓⍙_OW ↓⍙_CC
+⍝ Used like: MSG←'C:\temp\' APL2TXT 'CMIOTA' 0     0
+
+⍝ Some key APL symbols and their Unicode code points in decimal:
+
+⍝ AV
+⍝ Ind Symbol-Unicode dec.      Unicode hex.
+⍝ --- -----------------------  ------------
+⍝ 1   ⎕TCNUL (Null) - 0        (U+0000)
+⍝ 2   ⍀ - (Undefined) - 0      (U+0000)
+⍝ 3   € (Euro) - 8364          (U+20AC)
+⍝ 4   ⍷ (Epsilon-Underscore) - 9079 (U+2377)
+⍝ 5   ⋄ (Diamond) - 9671       (U+25C7)
+⍝ 6   ¨ (Diaeresis) - 168      (U+00A8)
+⍝ 7   ← (Left Arrow) - 8592    (U+2190)
+⍝ 8   ⎕TCBEL (Bell) - 7        (U+0007)
+⍝ 9   ⎕TCBS (Backspace) - 8    (U+0008)
+⍝ 10  ⎕TCHT (Tab) - 9          (U+0009)
+⍝ 11  ⎕TCLF (Line Feed) - 10   (U+000A)
+⍝ 12  ⊂ (Enclose, Subset Of) - 8834 (U+2282)
+⍝ 13  ⎕TCFF (FormFeed) - 12    (U+000C)
+⍝ 14  ⎕TCNL (New Line) - 10    (U+000A)
+⍝ 15  ⊃ (Disclose, Right Shoe, Superset Of) - 8835 (U+2283)
+⍝ 16  ⍟ (Log) - 9055           (U+236F)
+⍝ 17  å (a with ring) - 229    (U+00E5)
+⍝ 18  æ (ae ligature) - 230    (U+00E6)
+⍝ 19  ì (i with grave) - 236   (U+00EC)
+⍝ 20  ⍫ (Stile Tilde) - 9067   (U+2373)
+⍝ 21  ù (u with grave) - 249   (U+00F9)
+⍝ 22  ò (o with grave) - 242   (U+00F2)
+⍝ 23  ⍬ (Zilde) - 9068         (U+237C)
+⍝ 24  ⍵ (Omega) - 9077         (U+2375)
+⍝ 25  ↑ (Up Arrow) - 8593      (U+2191)
+⍝ 26  ↓ (Down Arrow) - 8595    (U+2193)
+⍝ 27  → (Right Arrow) - 8594   (U+2192)
+⍝ 28  ⎕TCESC (Escape) - 27     (U+001B)
+⍝ 29  ⊣ (Left Tack) - 8867     (U+22A3)
+⍝ 30  ⊢ (Right Tack) - 8866    (U+22A2)
+⍝ 31  ⍋ (Grade Up) - 9035      (U+234B)
+⍝ 32  ⍒ (Grade Down) - 9042    (U+2352)
+⍝ 33  (Space) - 32             (U+0020)
+⍝ 34  ! - 33                   (U+0021)
+⍝ 35  " - 34                   (U+0022)
+⍝ 36  # - 35                   (U+0023)
+⍝ 37  $ - 36                   (U+0024)
+⍝ 38  % - 37                   (U+0025)
+⍝ 39  & - 38                   (U+0026)
+⍝ 40  ' - 39                   (U+0027)
+⍝ 41  ( - 40                   (U+0028)
+⍝ 42  ) - 41                   (U+0029)
+⍝ 43  * - 42                   (U+002A)
+⍝ 44  + - 43                   (U+002B)
+⍝ 45  , - 44                   (U+002C)
+⍝ 46  - - 45                   (U+002D)
+⍝ 47  . - 46                   (U+002E)
+⍝ 48  / - 47                   (U+002F)
+⍝ 49  0 - 48                   (U+0030)
+⍝ 50  1 - 49                   (U+0031)
+⍝ 51  2 - 50                   (U+0032)
+⍝ 52  3 - 51                   (U+0033)
+⍝ 53  4 - 52                   (U+0034)
+⍝ 54  5 - 53                   (U+0035)
+⍝ 55  6 - 54                   (U+0036)
+⍝ 56  7 - 55                   (U+0037)
+⍝ 57  8 - 56                   (U+0038)
+⍝ 58  9 - 57                   (U+0039)
+⍝ 59  : - 58                   (U+003A)
+⍝ 60  ; - 59                   (U+003B)
+⍝ 61  < - 60                   (U+003C)
+⍝ 62  = - 61                   (U+003D)
+⍝ 63  > - 62                   (U+003E)
+⍝ 64  ? - 63                   (U+003F)
+⍝ 65  @ - 64                   (U+0040)
+⍝ 66  A - 65                   (U+0041)
+⍝ 67  B - 66                   (U+0042)
+⍝ 68  C - 67                   (U+0043)
+⍝ 69  D - 68                   (U+0044)
+⍝ 70  E - 69                   (U+0045)
+⍝ 71  F - 70                   (U+0046)
+⍝ 72  G - 71                   (U+0047)
+⍝ 73  H - 72                   (U+0048)
+⍝ 74  I - 73                   (U+0049)
+⍝ 75  J - 74                   (U+004A)
+⍝ 76  K - 75                   (U+004B)
+⍝ 77  L - 76                   (U+004C)
+⍝ 78  M - 77                   (U+004D)
+⍝ 79  N - 78                   (U+004E)
+⍝ 80  O - 79                   (U+004F)
+⍝ 81  P - 80                   (U+0050)
+⍝ 82  Q - 81                   (U+0051)
+⍝ 83  R - 82                   (U+0052)
+⍝ 84  S - 83                   (U+0053)
+⍝ 85  T - 84                   (U+0054)
+⍝ 86  U - 85                   (U+0055)
+⍝ 87  V - 86                   (U+0056)
+⍝ 88  W - 87                   (U+0057)
+⍝ 89  X - 88                   (U+0058)
+⍝ 90  Y - 89                   (U+0059)
+⍝ 91  Z - 90                   (U+005A)
+⍝ 92  [ - 91                   (U+005B)
+⍝ 93  \ - 92                   (U+005C)
+⍝ 94  ] - 93                   (U+005D)
+⍝ 95  ^ - 94                   (U+005E)
+⍝ 96  _ - 95                   (U+005F)
+⍝ 97  ` - 96                   (U+0060)
+⍝ 98  a - 97                   (U+0061)
+⍝ 99  b - 98                   (U+0062)
+⍝ 100 c - 99                   (U+0063)
+⍝ 101 d - 100                  (U+0064)
+⍝ 102 e - 101                  (U+0065)
+⍝ 103 f - 102                  (U+0066)
+⍝ 104 g - 103                  (U+0067)
+⍝ 105 h - 104                  (U+0068)
+⍝ 106 i - 105                  (U+0069)
+⍝ 107 j - 106                  (U+006A)
+⍝ 108 k - 107                  (U+006B)
+⍝ 109 l - 108                  (U+006C)
+⍝ 110 m - 109                  (U+006D)
+⍝ 111 n - 110                  (U+006E)
+⍝ 112 o - 111                  (U+006F)
+⍝ 113 p - 112                  (U+0070)
+⍝ 114 q - 113                  (U+0071)
+⍝ 115 r - 114                  (U+0072)
+⍝ 116 s - 115                  (U+0073)
+⍝ 117 t - 116                  (U+0074)
+⍝ 118 u - 117                  (U+0075)
+⍝ 119 v - 118                  (U+0076)
+⍝ 120 w - 119                  (U+0077)
+⍝ 121 x - 120                  (U+0078)
+⍝ 122 y - 121                  (U+0079)
+⍝ 123 z - 122                  (U+007A)
+⍝ 124 { - 123                  (U+007B)
+⍝ 125 | - 124                  (U+007C)
+⍝ 126 } - 125                  (U+007D)
+⍝ 127 ~ - 126                  (U+007E)
+⍝ 128 ≢ (Not Identical To) - 8802 (U+2262)
+⍝ 129 Ç (C with cedilla) - 199 (U+00C7)
+⍝ 130 ü (u with diaeresis) - 252 (U+00FC)
+⍝ 131 é (e with acute) - 233   (U+00E9)
+⍝ 132 â (a with circumflex) - 226 (U+00E2)
+⍝ 133 ä (a with diaeresis) - 228 (U+00E4)
+⍝ 134 à (a with grave) - 224   (U+00E0)
+⍝ 135 ≠ (Not Equal To) - 8800  (U+2260)
+⍝ 136 ç (c with cedilla) - 231 (U+00E7)
+⍝ 137 ê (e with circumflex) - 234 (U+00EA)
+⍝ 138 ë (e with diaeresis) - 235 (U+00EB)
+⍝ 139 è (e with grave) - 232   (U+00E8)
+⍝ 140 ï (i with diaeresis) - 239 (U+00EF)
+⍝ 141 î (i with circumflex) - 238 (U+00EE)
+⍝ 142 ⌈ (Ceiling) - 8968       (U+2308)
+⍝ 143 Ä (A with diaeresis) - 196 (U+00C4)
+⍝ 144 ⌊ (Floor) - 8970         (U+230A)
+⍝ 145 É (E with acute) - 201   (U+00C9)
+⍝ 146 ∆ (Delta) - 8710         (U+2206)
+⍝ 147 × (Multiplication) - 215 (U+00D7)
+⍝ 148 ô (o with circumflex) - 244 (U+00F4)
+⍝ 149 ö (o with diaeresis) - 246 (U+00F6)
+⍝ 150 ⎕ (APL Quad) - 9109      (U+2395)
+⍝ 151 û (u with circumflex) - 251 (U+00FB)
+⍝ 152 ⍞ (Quote Quad) - 9054    (U+236E)
+⍝ 153 ⌹ (Matrix Divide) - 9017 (U+2339)
+⍝ 154 Ö (O with diaeresis) - 214 (U+00D6)
+⍝ 155 Ü (U with diaeresis) - 220 (U+00DC)
+⍝ 156 ¢ (Cent) - 162           (U+00A2)
+⍝ 157 £ (Pound) - 163          (U+00A3)
+⍝ 158 ¥ (Yen) - 165            (U+00A5)
+⍝ 159 ⍪ (Comma Bar) - 9066     (U+237A)
+⍝ 160 ⍨ (Tilde Diaeresis) - 9064 (U+2378)
+⍝ 161 á (a with acute) - 225   (U+00E1)
+⍝ 162 í (i with acute) - 237   (U+00ED)
+⍝ 163 ó (o with acute) - 243   (U+00F3)
+⍝ 164 ú (u with acute) - 250   (U+00FA)
+⍝ 165 ñ (n with tilde) - 241   (U+00F1)
+⍝ 166 Ñ (N with tilde) - 209   (U+00D1)
+⍝ 167 ⍝ (APL Comment) - 9053   (U+236D)
+⍝ 168 ⍀ (Up Tack Jot) - 9024   (U+2340)
+⍝ 169 ¿ (Inverted Question) - 191 (U+00BF)
+⍝ 170 ⌷ (Squad) - 9015         (U+2337)
+⍝ 171 õ (o with tilde) - 245   (U+00F5)
+⍝ 172 ø (o with slash) - 248   (U+00F8)
+⍝ 173 ý (y with acute) - 253   (U+00FD)
+⍝ 174 ¡ (Inverted Exclamation) - 161 (U+00A1)
+⍝ 175 « (Left Double Angle Quote) - 171 (U+00AB)
+⍝ 176 » (Right Double Angle Quote) - 187 (U+00BB)
+⍝ 177 ⎕ (APL Quad) - 9109      (U+2395)
+⍝ 178 ⎕ (APL Quad) - 9109      (U+2395)
+⍝ 179 ⎕ (APL Quad) - 9109      (U+2395)
+⍝ 180 ∣ (Vertical Line) - 124  (U+007C)
+⍝ 181 ∣ (Vertical Line) - 124  (U+007C)
+⍝ 182 ∣ (Vertical Line) - 124  (U+007C)
+⍝ 183 ∣ (Vertical Line) - 124  (U+007C)
+⍝ 184 + (Plus) - 43            (U+002B)
+⍝ 185 + (Plus) - 43            (U+002B)
+⍝ 186 ∣ (Vertical Line) - 124  (U+007C)
+⍝ 187 ∣ (Vertical Line) - 124  (U+007C)
+⍝ 188 + (Plus) - 43            (U+002B)
+⍝ 189 + (Plus) - 43            (U+002B)
+⍝ 190 + (Plus) - 43            (U+002B)
+⍝ 191 + (Plus) - 43            (U+002B)
+⍝ 192 + (Plus) - 43            (U+002B)
+⍝ 193 À (A with grave) - 192   (U+00C0)
+⍝ 194 Á (A with acute) - 193   (U+00C1)
+⍝ 195 Â (A with circumflex) - 194 (U+00C2)
+⍝ 196 Ã (A with tilde) - 195   (U+00C3)
+⍝ 197 Ä (A with Diaeresis) - 196 (U+00C4)
+⍝ 198 Å (A with ring) - 197    (U+00C5)
+⍝ 199 Æ (AE ligature) - 198    (U+00C6)
+⍝ 200 Ç (C with cedilla) - 199 (U+00C7)
+⍝ 201 È (E with grave) - 200   (U+00C8)
+⍝ 202 É (E with accute) - 201  (U+00C9)
+⍝ 203 Ê (E with circumflex) - 202 (U+00CA)
+⍝ 204 Ë (E with diaeresis) - 203 (U+00CB)
+⍝ 205 Ì (I with grave) - 204   (U+00CC)
+⍝ 206 Í (I with acute) - 205   (U+00CD)
+⍝ 207 Î (I with circumflex) - 206 (U+00CE)
+⍝ 208 Ï (I with diaeresis) - 207 (U+00CF)
+⍝ 209 - (Hyphen) - 45          (U+002D)
+⍝ 210 Ñ (N with tilde) - 209   (U+00D1)
+⍝ 211 Ò (O with grave) - 210   (U+00D2)
+⍝ 212 Ó (O with acute) - 211   (U+00D3)
+⍝ 213 Ô (O with circumflex) - 212 (U+00D4)
+⍝ 214 Õ (O with tilde) - 213   (U+00D5)
+⍝ 215 Ö (O with diaeresis) - 214 (U+00D6)
+⍝ 216 + (Plus) - 43            (U+002B)
+⍝ 217 Ø (O with slash) - 216   (U+00D8)
+⍝ 218 Ù (U with grave) - 217   (U+00D9)
+⍝ 219 Ú (U with acute) - 218   (U+00DA)
+⍝ 220 Û (U with circumflex) - 219 (U+00DB)
+⍝ 221 Ü (U with diaeresis) - 220 (U+00DC)
+⍝ 222 Ý (Y with acute) - 221   (U+00DD)
+⍝ 223 ∣ (Vertical Line) - 124  (U+007C)
+⍝ 224 ÿ (y with diaeresis) - 255 (U+00FF)
+⍝ 225 ⍺ (Alpha) - 9082         (U+237A)
+⍝ 226 ß (Sharp S) - 223        (U+00DF)
+⍝ 227 ⍳ (Iota) - 9075          (U+2373)
+⍝ 228 ⍤ (Jot Diaeresis) - 9060 (U+2364)
+⍝ 229 ã (a with tilde) - 227   (U+00E3)
+⍝ 230 ⍱ (Down Caret Tilde) - 9073 (U+2371)
+⍝ 231 ⊥ (Up Tack) - 8869       (U+22A5)
+⍝ 232 ⊤ (Down Tack) - 8868     (U+22A4)
+⍝ 233 ⌽ (Circle Stile) - 9021  (U+233D)
+⍝ 234 ⊖ (Circle Minus) - 8854  (U+2296)
+⍝ 235 ⍲ (Up Caret Tilde) - 9074 (U+2372)
+⍝ 236 ⌿ (Slash Bar) - 9023     (U+233F)
+⍝ 237 ∇ (Del/Nabla) - 8711     (U+2207)
+⍝ 238 ⍉ (Circle Slash) - 9033  (U+2349)
+⍝ 239 ∊ (Element Of) - 8712    (U+2208)
+⍝ 240 ∩ (Intersection) - 8745  (U+2229)
+⍝ 241 ≡ (Identical To) - 8801  (U+2261)
+⍝ 242 ⍙ (Delta Underbar) - 9049 (U+2359)
+⍝ 243 ≥ (Greater Than or Equal) - 8805 (U+2265)
+⍝ 244 ≤ (Less Than or Equal) - 8804 (U+2264)
+⍝ 245 ⍕ (Format) - 9045        (U+2355)
+⍝ 246 ⍎ (Execute) - 9038       (U+234E)
+⍝ 247 ÷ (Division) - 247       (U+00F7)
+⍝ 248 " (Quotation Mark) - 34  (U+0022)
+⍝ 249 ∘ (Ring Operator) - 8728 (U+2218)
+⍝ 250 ○ (Circle) - 9675        (U+25CB)
+⍝ 251 ∨ (Logical Or) - 8744    (U+2228)
+⍝ 252 ⍴ (Rho) - 9076           (U+2374)
+⍝ 253 ∪ (Union) - 8746         (U+222A)
+⍝ 254 ¯ (Macron) - 175         (U+00AF)
+⍝ 255 ∣ (Divides) - 8739       (U+2223)
+⍝ 256 ÿ (y with diaeresis) - 255 (U+00FF)
+
+ ⎕IO←1
+⍝ ⍙_PATH not provided? Use current ws path:
+:If 0=⍴⍙_PATH
+  :If 0≠⍴⍙_PATH←⎕WSID ⍝ Not a clear ws?
+    ⍝ Logic from <TODOS> for dealing with APL+Win Lib No.s:
+    :If ↑⎕VI ⍙_PATH ⍝ File with APL library number?
+       ⍙_PATH←(-¯1+(⌽⍙_PATH)⍳' ')↓⍙_PATH ⍝ Path num before ws name
+      ⍝ Delete lib no. and trailing blanks (allow for '18 XYZ\3M42A.PRN'):
+       ⍙_T←⍙_PATH=' ' ⋄ ⍙_PATH←(-+/^\⌽⍙_T)↓(1<+\2>/1,⍙_T)/⍙_PATH
+       ⍙_L←↑⎕FI ⍙_PATH ⋄ ⍙_T←⌊0⌈⍙_L⌊2147483647 ⋄ ⍙_V←⎕LIBD ⍙_T
+      ⍝ If lib no. invalid or not found, use {currentdir}; handle 'D:':
+      :If ⍙_L≠⍙_T ⋄ :OrIf 0∊⍴⍙_V
+         ⍙_V←⎕CHDIR ''
+      :ElseIf 0 1 ≡⍙_V=':' ⋄ ⍙_V←⎕CHDIR ⍙_V
+      :EndIf
+       ⍙_PATH←⍙_V,('\'≠¯1↑⍙_V)⍴'\' ⍝ Incl \ unless A:\ or C:\ ...
+    :Else ⋄ ⍙_PATH←(-¯1+(⌽⎕WSID)⍳'\')↓⎕WSID ⍝ ⎕WSID not numeric lib
+    :EndIf
+  :Else ⋄ ⍙_PATH←(⎕CHDIR ''),'\' ⍝ Use current dir (probably install dir)
+  :EndIf
+⍝ Ensure there is a trailing \ on the path:
+:ElseIf '\'≠¯1↑⍙_PATH ⋄ ⍙_PATH←⍙_PATH,'\'
+:EndIf
+ (⍙_OBJ ⍙_OW ⍙_CC)←⍙_RA ⍝ Object name; Overwrite?; Case code?
+ ⍙_NC←⎕NC ⍙_OBJ
+⍝ Done if not a fn or variable:
+:if ~⍙_NC∊2 3 ⋄ ⍙_R←'Object must be a function or variable.' ⋄ →0 ⋄ :endif
+:If ⍙_NC=3 ⋄ ⍙_DATA←⎕CR ⍙_OBJ ⋄ ⍙_EXT←'.aplwfn' ⍝ Is ⍙_OBJ a function (3)?
+:Else ⍝ Try to grab it as a variable (empty cvec if not defd)
+   ⍙_DATA←⎕VGET ⍙_OBJ ''
+  :If 82≠⎕DR ⍙_DATA ⍝ Non-character data?
+     ⍙_DATA←'wrapl' ⎕DR ⍙_DATA ⍝ Characters now
+     ⍙_EXT←'.aplwvr' ⍝ Non-char variable data
+  :Else ⋄ ⍙_EXT←'.aplwcv' ⍝ Character data
+  :EndIf
+  ⍝ Is it a matrix? Treat last dimension as new line in file.  Ignore
+  ⍝ earlier dimensions
+  :if 1<⍙_T←⍴⍴⍙_DATA ⋄ ⍙_DATA←,⍙_DATA,[⍙_T]⎕TCNL ⋄ :endif
+:EndIf
+
+⍝ Vec of unicode nums (⎕UCS right args) corresp w/ ⎕AV (not used):
+⍝ ⍙_T←0 0 8364 9079 9671 168 8592 7 8 9 10 8834 12 10
+⍝ ⍙_T←⍙_T,8835 9055 229 230 236 9067 249 242 9068 9077 8593 8595 8594 27
+⍝ ⍙_T←⍙_T,8867 8866 9035 9042 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46
+⍝ ⍙_T←⍙_T,47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68
+⍝ ⍙_T←⍙_T,69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90
+⍝ ⍙_T←⍙_T,91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109
+⍝ ⍙_T←⍙_T,110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126
+⍝ ⍙_T←⍙_T,8802 199 252 233 226 228 224 8800 231 234 235 232 239 238 8968 196
+⍝ ⍙_T←⍙_T,8970 201 8710 215 244 246 9109 251 9054 9017 214 220 162 163 165
+⍝ ⍙_T←⍙_T,9066 9064 225 237 243 250 241 209 9053 9024 191 9015 245 248 253
+⍝ ⍙_T←⍙_T,161 171 187 9109 9109 9109 124 124 124 124 43 43 124 124
+⍝ ⍙_T←⍙_T,43 43 43 43 43 192 193 194 195 196 197 198 199 200 201
+⍝ ⍙_T←⍙_T,202 203 204 205 206 207 45 209 210 211 212 213 214 43 216 217
+⍝ ⍙_T←⍙_T,218 219 220 221 124 255 9082 223 9075 9060 227 9073 8869 8868
+⍝ ⍙_T←⍙_T,9021 8854 9074 9023 8711 9033 8712 8745 8801 9049 8805 8804 9045
+⍝ ⍙_T←⍙_T,9038 247 34 8728 9675 8744 9076 8746 175 8739 255
+
+⍝ Convert mat to ⎕TCLF delimited (UNIX style) vector:
+⍝ If v19 is in use, use ⎕CV (for speed) else, use DTBV logic:
+:If 19≤⎕FI 2↑⎕SYSVER ⋄ ⍙_DATA←⎕TCLF ⎕CV ⍙_DATA
+:Else ⋄ ⍙_U←+/∨\' '≠⌽⍙_DATA ⋄ ⍙_DATA←⍙_U↑¨⊂[⎕IO+1]⍙_DATA
+   ⍙_DATA←∊⍙_DATA,¨⎕TCLF
+:EndIf
+⍝ Convert from ⎕AV internal UCS structure to UTF-8 (unicode):
+ ⍙_TXT←'X-AV-UCS' 'UTF-8' ⎕UCS ⍙_DATA ⍝ Now we have unicode chars
+
+⍝ Add a case code? This is for workspace's with functions whose names
+⍝ only differ by case (e.g. Foo vs foo) as Windows does not allow for
+⍝ filenames that differ only in case:
+:If ⍙_CC
+  ⍝ Bits of uppercase letters of obj name, reversed, converted to
+  ⍝ decimal, then to octal (e.g. Foo -> Foo-10, foo -> foo-00) :
+   ⍙_CC←'-',∊⍕¨0 8⊤(2⊥⌽⍙_OBJ∊⎕AV[65+⍳26])
+:Else ⋄ ⍙_CC←'' ⍝ No case code
+:EndIf
+
+⍝ Using .txt makes most text editors see the file as UTF-8!
+ ⍙_NAME←⍙_OBJ,⍙_CC,⍙_EXT
+ ⍙_FILE←⍙_PATH,⍙_NAME
+ ⍙_TIE←⎕NNUMS,⎕XNNUMS ⋄ ⍙_TIE←-((⍳⍴⍙_TIE)∊∣⍙_TIE)⍳0
+
+⍝ Does the file already exist?:
+:If 1∊⍙_NAME⍷⎕LIB ⍙_PATH
+  :If ⍙_OW ⍝ Overwrite exising file?
+     ⍙_FILE ⎕XNTIE ⍙_TIE
+     ⍙_FILE ⎕XNERASE ⍙_TIE
+  :Else ⋄ ⍙_R←'File not created. "',⍙_FILE,'" already exists.' ⋄ →0
+  :EndIf
+:EndIf
+
+⍝ Create output file, write to it, untie it:
+ ⍙_FILE ⎕XNCREATE ⍙_TIE
+ ⍙_TXT ⎕NAPPEND ⍙_TIE
+ ⎕NUNTIE ⍙_TIE
+⍝ Set the file's timestamp to the APL+Win timestamp of the source object.
+⍝ Insert dummy day of week value in position 3 so we get an 8 elm vec we
+⍝ can convert to windows file time structure:
+ ⍙_TIME←2 ⎕AT ⍙_OBJ ⋄ ⍙_TIME←(2↑⍙_TIME),0,2↓⍙_TIME
+⍝ Convert 8-elm vec to 2 32bit ints for filetime:
+ ⍙_TIME←2⊃⎕WCALL 'SystemTimeToFileTime' ⍙_TIME (2⍴0)
+ ⍙_T←'FILE_WRITE_ATTRIBUTES' 'FILE_SHARE_READ FILE_SHARE_WRITE' 0 'OPEN_EXISTING' 0 0
+ ⍙_U←⎕WCALL 'CreateFile' ⍙_FILE,⍙_T
+ ⍙_V←⎕WCALL 'SetFileTime' ⍙_U 0 0 ⍙_TIME ⋄ ⍙_V←⎕WCALL 'CloseHandle' ⍙_U
+ ⍙_R←'"',⍙_FILE,'" created.' ⍝ Success

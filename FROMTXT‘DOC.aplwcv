@@ -1,0 +1,44 @@
+APL+Win functions and variables defined from .txt format (UTF-8)
+
+Syntax for defining a single object: ]FROMTXT OBJNAME
+
+  Optional params: ]FROMTXT OBJNAME /P=C:\temp\ /R
+
+Sytnax for overwriting all objects within the workspace with the
+contents of corresponding text files in the workspace's parent dir, in
+the current ws:
+
+  ]FROMTXT
+
+Sytnax for overwriting objects within the workspace with the contents of
+corresponding text files in a given file path:
+
+  ]FROMTXT /P=C:\PATH\WHERE\APL\TXT\FILES\EXIST
+
+Read from one or more UTF-8 encoded text file(s) in the current
+workspace's path or in the supplied path (/P=) to define the contents
+within the current workspace.  The source text file(s) should be created
+by ]TOTXT (this command's sibling) and contains the APL function or
+variable represented by OBJNAME called "{PATH}\OBJNAME.{EXT}" where
+{EXT} is:
+
+ - '.aplwfn' if the object is a function
+ - '.aplwcv' if the object is a character vector
+ - '.aplwvr' if the object is an APL+Win variable that is not a simple
+     character vector.
+
+If the object represented in the source text file already exists in the
+current workspace and /R is provided, the in workspace object is
+overwritten with the object on the text file, otherwise the object is
+not redefined.  /R is only used for the ]FROMTXT OBJNAME syntax,
+otherwise the file contents are always given precedence.
+
+If /P is provided, the path must use '\' and not '/'.
+
+Note that the text based code files can be suffixed with a case code
+if multiple objects in the workspace have names that differ only in
+case (e.g. "Foo-04.aplwfn").  ]FROMTEXT uses the case code to shape the
+cases of its result objects if it is available, otherwise, the filename
+or requested object names dictate the case structure.
+
+Returns a message indicating success or failure.

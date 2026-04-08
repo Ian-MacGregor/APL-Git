@@ -1,0 +1,30 @@
+ R←⍙GitIgnore ⍙RA;⍙CMD;⍙PDIR;⍙TEMP;⍙TIE;⍙WS
+
+⍝ - Mark a file within the parent directory as a file that should not
+⍝   be managed by ]Git.  The first time this call is run for a
+⍝   repository, a "gitignore" file is created in the repository to
+⍝   keep track of the ignored files.  Subsequent ]Git Ignore calls
+⍝   will update the existing gitignore file.  [Filename] includes the extension
+⍝   but not filepath required.  After using this call, the gitignore file will
+⍝   need to be added, commited and then pushed via ]Git Add, ]Git Commit and ]Git Push.
+⍝
+⍝   Returns the updated contents of the .gitignore file
+⍝
+⍝   Otherwise, returns an error message.
+⍝
+⍝ - [TLDR: Tell git not to track a file]
+⍝
+⍝ NOTE: If file already being tracked (i.e. committed at least once),
+⍝ then .gitignore will not stop Git from tracking it (will need to remove it
+⍝ first then add it again)
+
+ (⍙RA ⍙TEMP ⍙PDIR)←⍙RA
+
+ ⍝ Build ⎕CMD argument to pass to ∆_COMMAND
+ ⍝ Note >> appends the file
+ ⍙CMD←'cd ',⍙PDIR,' && echo ',⍙RA,' >> .gitignore'
+⍝ Run cmd call:
+ 3 ⎕CMD ⍙CMD
+⍝ Read contents of .gitignore
+ ⍙CMD←'type .gitignore'
+ R←⍙TEMP ⍙COMMAND ⍙PDIR ⍙CMD

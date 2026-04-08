@@ -1,0 +1,45 @@
+ CMDTOTXT ⍙RA;⍙C;⍙C;⍙I;⍙N;⍙P;⍙T;⍙U;⍙R;⍙O;⎕IO
+⍝ APL+Win user command ]TOTXT
+⍝ Create a text file containing the given variable or function in UTF-8
+⍝ encoding.  FIle name will be the provided object name and a '.txt'
+⍝ extension.  Filepath can be provided with /P but must use '\' and not
+⍝ '/'.  If /P= is not provided, text file is built in the current
+⍝ workspace's file path.  If /R is provided and the file exists, the
+⍝ file is overwritten.  Returns status message (success or failure).
+
+ ⎕IO←1
+⍝ Output path (or ''):
+:if 1∊⍙T←⍙RA ⎕SS '/P=' ⋄ ⍙T←3↓(∨\⍙T)/⍙RA ⋄ ⍙P←(^\⍙T≠' ')/⍙T ⋄ :else ⋄ ⍙P←'' ⋄ :endif
+⍝ Object name (or ''):
+ ⍙O←' '≠⍙T←(^\⍙RA≠'/')/⍙RA ⋄ ⍙O←((∨\⍙O)^⌽∨\⌽⍙O)/⍙T
+:If 0≠⍴⍙O ⍝ Object(s) given?
+  :If ' '∊⍙O ⍝ Multiple objects given?
+    ⍝ Convert from "FOO1 FOO2 FOO3" to "FOO1" "FOO2" "FOO3":
+     ⍙O←(((1,1↓(⍙O=' '))∨¯1⌽(⍙O=' ')) ⎕PENCLOSE ⍙O)~⊂,' '
+     ⍙N←⍴⍙O ⋄ ⍙C←⍙N≠⍴∪⎕WCALL¨(⊂⊂'CharUpper'),¨⊂¨⍙O
+  :Else ⋄ ⍙O←,⊂⍙O ⋄ ⍙C←0 ⍝ Single object given
+  :EndIf
+   ⍙I←0 ⋄ ⍙R←'' ⋄ ⍙T←1∊⍙RA ⎕SS '/R' ⍝ /R=Overwrite existing file?
+  :While (⍴⍙O)≥⍙I←⍙I+1 ⍝ Loop to write each object
+     ⍙R←⍙R,((⍙I≠1)⍴⎕TCNL),⍙P APL2TXT (⍙I⊃⍙O) ⍙T ⍙C
+  :EndWhile
+:Else ⍝ No object name → Write all objects from workspace to txt
+  ⍝ Object names; skip vars starting with ⍙:
+   ⍙O←⎕NL 2 ⋄ ⍙O←(⊂[2]('⍙'≠,1↑[2]⍙O)⌿⍙O)~¨' '
+  ⍝ ... and skip UCMD related fns, i.e. those in this list:
+   ⍙T←'APL2TXT' 'CMDGIT' 'CMDTOTXT' '⍙DEB' '⍙F' '⍙FOPEN' '⍙FTNUM' '⍙GETOPT' '⍙IFERRIN' '⍙MATIOTA' '⍙MATRIFY' '⍙OUT' '⍙OVER' '⍙PDEF' '⍙PNAMES' '⍙TIEUF' '⍙UCASE' '⍙UCMD' '⍙UCMD2'
+  ⍝ ... and skip anything related to the ]Git commands:
+   ⍙U←⎕NL 3 ⋄ ⍙U←(⊂[2]((4↑[2]⍙U)^.≠'⍙Git')⌿⍙U)~¨' '
+   ⍙O←⍙O,⍙U~⍙T
+  ⍝ Are there case conflicts in this ws? If so, use case code (⍙C) to
+  ⍝ append octal suffix denoting case of the characters in the object
+  ⍝ name.  This solves the issue of Windows not allowing file names to
+  ⍝ only differ in case:
+   ⍙N←⍴⍙O ⋄ ⍙C←⍙N≠⍴∪⎕WCALL¨(⊂⊂'CharUpper'),¨⊂¨⍙O
+   ⍙I←0 ⋄ ⍙R←''
+  :While ⍙N≥⍙I←⍙I+1 ⍝ Loop for each obj to write
+    ⍝ 1: Always overwrite when writing entire ws:
+     ⍙R←⍙R,((⍙I≠1)⍴⎕TCNL),⍙P APL2TXT (⍙I⊃⍙O) 1 ⍙C
+  :EndWhile
+:EndIf
+ ⍙RESULT←⍙R

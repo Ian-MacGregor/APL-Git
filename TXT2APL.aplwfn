@@ -1,0 +1,85 @@
+ ⍙_R←⍙_PATH TXT2APL ⍙_RA;⍙_CC;⍙_DATA;⍙_FILE;⍙_I;⍙_L;⍙_N;⍙_NAME;⍙_NAMES;⍙_NC;⍙_OBJ;⍙_OW;⍙_T;⍙_TIE;⍙_U;⍙_V;⍙_W;⎕IO
+⍝ This function performs the opposite action of <APL2TXT>.  In other
+⍝ words, it takes a text file containing a UTF-8 representation of an
+⍝ APL+Win function or object (created by <APL2TXT> and defines it in
+⍝ the current workspace.
+
+⍝ ⍙_PATH: Character vector name of path where UTF-8 APL+Win text files
+⍝         are located (e.g. "C:\temp\WORKPSACE\" or "101 WORKSPACE"
+
+⍝ ⍙_RA is (⍙_OBJ ⍙_OW) where:
+
+⍝ ⍙_OW:  0=Do not overwrite objects in the current ws of the same name
+⍝        1=Overwrite
+⍝
+
+⍝ ⍙_OBJ: Character vector object name (e.g. 'CMIOTA') to define from
+⍝        source text file in ⍙_PATH.  For example:
+⍝          ⍙_OBJ='CMIOTA' from the C:\temp\WORKSPACE\WORKSPACE.w3 workspace would
+⍝          imply a source file of "C:\temp\WORKSPACE\CMIOTA.aplwfn"
+
+⍝ ⍙_R:   Character vector success or failure message
+
+⍝ Used like:
+⍝ ⍙_R←'C:\temp\codedir' TXT2APL 'CMIOTA' 1
+
+⎕IO←1 ⋄ (⍙_OBJ ⍙_OW)←⍙_RA ⍝ Object name; Overwrite?
+:if ⍙_OW<0≠⎕NC ⍙_OBJ ⋄ ⍙_R←'"',⍙_OBJ,'" already exists.' ⋄ →0 ⋄ :endif
+⍝ ⍙_PATH not provided? Use current ws path:
+:If 0=⍴⍙_PATH
+  :If 0≠⍴⍙_PATH←⎕WSID ⍝ Not a clear ws?
+    ⍝ Logic from <TODOS> for dealing with APL+Win Lib No.s:
+    :If ↑⎕VI ⍙_PATH ⍝ File with APL library number?
+       ⍙_PATH←(-¯1+(⌽⍙_PATH)⍳' ')↓⍙_PATH ⍝ Path num before ws name
+      ⍝ Delete lib no. and trailing blanks (allow for '18 XYZ\3M42A.PRN'):
+       ⍙_T←⍙_PATH=' ' ⋄ ⍙_U←(-+/^\⌽⍙_T)↓(1<+\2>/1,⍙_T)/⍙_PATH
+       ⍙_L←↑⎕FI ⍙_PATH ⋄ ⍙_T←⌊0⌈⍙_L⌊2147483647 ⋄ ⍙_V←⎕LIBD ⍙_T
+      ⍝ If lib no. invalid or not found, use {currentdir}; handle 'D:':
+      :If ⍙_L≠⍙_T ⋄ :OrIf 0∊⍴⍙_V
+         ⍙_V←⎕CHDIR ''
+      :ElseIf 0 1 ≡⍙_V=':' ⋄ ⍙_V←⎕CHDIR ⍙_V
+      :EndIf
+       ⍙_PATH←⍙_V,('\'≠¯1↑⍙_V)⍴'\' ⍝ Incl \ unless A:\ or C:\ ...
+    :Else ⋄ ⍙_PATH←(-¯1+(⌽⎕WSID)⍳'\')↓⎕WSID ⍝ ⎕WSID not numeric lib
+    :EndIf
+  :Else ⋄ ⍙_PATH←(⎕CHDIR ''),'\' ⍝ Use current dir (probably install dir)
+  :EndIf
+⍝ Ensure there is a trailing \ on the path:
+:ElseIf '\'≠¯1↑⍙_PATH ⋄ ⍙_PATH←⍙_PATH,'\'
+:EndIf
+
+⍝ Acceptable APL+Win text file extensions (Function; Non-cvec Var; Var):
+ ⍙_T←'.APLWFN' '.APLWCV' '.APLWVR'
+⍝ Three possible source file names for this fn/obj (w/o case code):
+ ⍙_U←⊂⎕WCALL 'CharUpper' ⍙_OBJ ⋄ ⍙_NAMES←⍙_U,¨⍙_T
+⍝ Case code for object (Bits of uppercase letters, reversed, decimal,
+⍝ then octal):
+ ⍙_CC←'-',∊⍕¨0 8⊤(2⊥⌽⍙_OBJ∊⎕AV[65+⍳26])
+⍝ Consider case coded file names as well (e.g. Foo-01.APLWFN):
+ ⍙_NAMES←⍙_NAMES,⍙_U,¨(⊂⍙_CC),¨⍙_T
+ ⍙_U←⎕LIB ⍙_PATH ⍝ Contents of source path
+ ⍙_U←⎕WCALL 'CharUpper' ⍙_U ⍝ Uppercase and mat→nest
+ ⍙_T←+/∨\' '≠⌽⍙_U ⋄ ⍙_V←⍙_T↑¨⊂[2]⍙_U ⍝ Mat→Nest (delete trailing blanks)
+ ⍙_I←↑(⍙_NAMES∊⍙_V)/⍳⍴⍙_NAMES ⍝ First matching file in ⍙_NAMES
+:if ⍙_I=0 ⋄ ⍙_R←'Source file for "',⍙_OBJ,'" not found in "',⍙_PATH,'".' ⋄ →0 ⋄ :endif
+ ⍙_NAME←⍙_I⊃⍙_NAMES ⍝ Source file name
+ ⍙_FILE←⍙_PATH,⍙_NAME ⍝ Full file name
+⍝ Available tie num for source text file:
+ ⍙_TIE←⎕NNUMS,⎕XNNUMS ⋄ ⍙_TIE←-((⍳⍴⍙_TIE)∊∣⍙_TIE)⍳0
+⍝ Read entire file as chars:
+ ⍙_FILE ⎕XNTIE ⍙_TIE ⋄ ⍙_DATA←⎕NREAD ⍙_TIE 82,(⎕NSIZE ⍙_TIE),0 ⋄ ⎕NUNTIE ⍙_TIE
+
+⍝ Convert from UTF-8 (unicode) structure to APL ⎕AV chars:
+ ⍙_U←'UTF-8' 'X-APL' ⎕UCS ⍙_DATA ⍝ Now we have APL+Win chars
+⍝ Replace ⎕TCLF chars with ⎕TCNL for ⎕DEF:
+:If ^/⎕TCNL ⎕TCLF∊⍙_U ⋄ ⍙_U←⍙_U~⎕TCLF ⍝ ⎕TCNL,⎕TCLF → ⎕TCNL
+:Else ⋄ ((⍙_U=⎕TCLF)/⍙_U)←⎕TCNL ⍝ ⎕TCLF → ⎕TCNL
+:EndIf
+:If ⍙_I∊1 4 ⍝ 1 or 4: Function (from .APLWFN file; 1=NoCaseCode; 4=CaseCode)
+  ⍝ Define function; return error if unable:
+  :if 82≠⎕DR ⍙_T←⎕DEF ⍙_U ⋄ ⍙_R←'"',⍙_OBJ,'" was not defined (',(⍕⍙_T),').' ⋄ →0 ⋄ :endif
+:Else ⍝ 2/3/5/6: Character vector or non-char var (from .APLWCV or .APLWVR file)
+  :if ⍙_I∊3 6 ⋄ ⍙_U←'unwrapl' ⎕DR ⍙_U ⋄ :endif ⍝ Unwrap undisplayable var
+   ⍎⍙_OBJ,'←⍙_U' ⍝ Assign value
+:EndIf
+ ⍙_R←'"',⍙_OBJ,'" was defined.' ⍝ Return success message

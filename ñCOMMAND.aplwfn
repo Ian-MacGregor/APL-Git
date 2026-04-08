@@ -1,0 +1,23 @@
+ ⍙R←⍙TEMPPATH ⍙COMMAND ⍙CMD;⍙PATH;⍙T;⍙TFILE
+⍝ Utility function for executing a Windows command and returning the
+⍝ result as a character vector.  This utility creates a temporary text
+⍝ file in the given ⍙TEMPPATH and removes it when it is done working.
+
+⍝ Used like:
+⍝   ⍙R←'C:\temp\' ⍙COMMAND 'C:\path\' 'fc "C:\path\filename.txt" "C:\path\filename.txt"'
+
+ (⍙PATH ⍙CMD)←⍙CMD ⍝ Path to execute in and command to execute
+:If 0≠⍴⍙PATH ⋄ ⍝ Set execution directory if passed
+  :if '\'=⍙T←↑⍙PATH ⋄ ⍙T←'' ⋄ :endif
+   ⍙T←⍙T ⎕CHDIR ⍙PATH ⍝ Change DOS directory
+:EndIf
+⍝ Include trailing delim if needed:
+:if ~∨/(¯1↑⍙TEMPPATH)='\/' ⋄ ⍙TEMPPATH←⍙TEMPPATH,'\' ⋄ :endif
+ ⍙TFILE←⍙TEMPPATH,'APLCOMMANDTEMPFILE.txt'
+ 3 ⎕CMD ⍙CMD,' >> ',⍙TFILE,' 2>&1' ⍝ Execute command and create the temp file
+⍝ Read the resulting text output:
+ ⍙T←⎕XNNUMS,⎕NNUMS ⋄ ⍙T←-((⍳⍴⍙T)∊∣⍙T)⍳0 ⍝ Find a tie
+ ⍙TFILE ⎕XNTIE ⍙T ⍝ Tie text file
+ ⍙R←⎕NREAD ⍙T 82 (⎕NSIZE ⍙T) 0 ⍝ Read all of it
+⍝ Delete the text file now we have read it:
+ ⍙TFILE ⎕XNERASE ⍙T

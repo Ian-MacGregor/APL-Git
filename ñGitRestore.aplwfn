@@ -1,0 +1,26 @@
+ R←⍙GitRestore ⍙RA;⍙CMD;⍙TEMP;⍙WS
+⍝ Restore text files and their workspace counterparts based off a
+⍝ specified commit or branch.
+⍝
+⍝ [TLDR: Restore code]
+
+⍝ Syntax: R←⍙GitRestore [PARAMS] [TEMP] [WS]
+⍝   TEMP: Temp dir for use by ⍙COMMAND
+⍝     WS: WS' parent dir
+⍝ PARAMS: branch name or commit to restore to (required) and any other
+⍝         params (see git restore documentation for a full list).
+⍝
+⍝
+⍝         For example, this line would restore the CMIOTA.aplwfn file
+⍝         after accidentally removing it
+⍝
+⍝            ]Git Restore CMIOTA.aplwfn
+
+ (⍙RA ⍙TEMP ⍙WS)←⍙RA
+:if 0=⍴⍙RA~' ' ⋄ R←'SYNTAX ERROR: Missing parameters' ⋄ →0 ⋄ :endif
+⍝ Build ⎕CMD argument to pass to ∆_COMMAND
+ ⍙CMD←'git restore ',⍙RA
+⍝ Returns output from the ⎕CMD call:
+ R←⍙TEMP ⍙COMMAND ⍙WS ⍙CMD
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

@@ -1,0 +1,17 @@
+ R←⍙GitRemove ⍙RA;⍙D;⍙T;⍙U
+⍝ Execute "git rm" in the workspace's parent directory to remove the
+⍝ specified file.  Does not erase the object from the workspace.
+
+⍝ Syntax: R←⍙GitRemove ⍙RA TempDir ParentDir
+
+⍝ e.g. ]Git Remove CMIOTA.apwlfn
+
+⍝ ⍙RA is required, it should contain at least one file name to remove
+⍝ and can contain additional parameters (e.g. -r for recursive removal
+⍝ of paths, see git rm documentation for full params).
+
+⍝ Requires: ⍙COMMAND
+ (⍙RA ⍙T ⍙D)←⍙RA ⍝ File(s &params); Temp Dir; Parent Dir
+ R←⍙T ⍙COMMAND ⍙D ('git rm ',⍙RA)
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

@@ -1,0 +1,20 @@
+ R←⍙GitPull ⍙RA;⍙CMD;⍙PDIR;⍙T;⍙TEMP
+⍝ Fetch (update loacl text files from remote repo) and pull (update ws
+⍝ objects from repo).
+⍝
+⍝ Returns success or error message.
+⍝
+⍝ [TLDR: Updates repo from local text files]
+
+⍝ Syntax: R←⍙GitPull [TEMP] [PDIR]
+⍝   TEMP: Temp dir for use by ⍙COMMAND
+⍝   PDIR: WS' parent dir
+
+ (⍙TEMP ⍙PDIR)←⍙RA
+⍝ Build ⎕CMD argument to pass to ∆_COMMAND
+ ⍙CMD←'git pull'
+⍝ Returns output from the ⎕CMD call:
+ R←⍙TEMP ⍙COMMAND ⍙PDIR ⍙CMD
+ ⍙T←⎕UCMD 'FROMTXT' ⍝ Define the updated objects in the workspace
+⍝ Deal with horrendous line feed placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

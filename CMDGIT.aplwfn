@@ -1,0 +1,60 @@
+ CMDGIT ⍙RA;⍙ACTION;⍙PDIR;⍙R;⍙T;⍙TEMP
+⍝ APL+Win and Git interface tool
+
+⍝ This tool is for maintaining APL+Win code using Git from APL+Win,
+⍝ no command line Git interaction required.  This tool calls the "Git"
+⍝ Windows Application and thus requires that Git is installed before
+⍝ this tool can work.
+
+⍝ Git can be downloaded from:
+
+⍝   https://git-scm.com/downloads
+
+⍝ Here is a Git command cheat sheet:
+
+⍝   https://education.github.com/git-cheat-sheet-education.pdf
+
+⍝ General call structure:
+
+⍝   ]Git [Action] {Object(s)/Param(s)}
+
+⍝ Where [Action] is a Git action (e.g. "Fetch", "Commit", "Push" etc.)
+⍝ and {Object} is a specific APL+Win object to manage with ]Git in case
+⍝ there are other changes in your current workspace you do not wish to
+⍝ commit or alter (unless otherwise specified as parameters).  Without
+⍝ an {Object} ]Git manages all functions and variables in the current
+⍝ workspace.
+
+⍝ See GIT∆DOC for full documentation on this tool.
+ ⍙RA←(~^\' '=⍙RA)/⍙RA ⍝ Drop leading spaces
+ ⍙T←¯1+⍙RA⍳' ' ⋄ ⍙ACTION←⍙T↑⍙RA ⍝ Get the action from ]Git [Action] {Object}
+ ⍙RA←(⍙T+1)↓⍙RA ⍝ Drop the action from the right arg
+ ⍙ACTION←⎕WCALL 'CharUpper' ⍙ACTION ⍝ Use caps to be case insensitive
+
+⍝ Gather some useful variables for use in the ⍙Git fns below:
+ ⍙PDIR←(-¯1+(⌽⎕WSID)⍳'\')↓⎕WSID ⍝ WS's parent ID
+⍝ Temp path needed when calling many ]Git interactions:
+ ⍙TEMP←⎕FIRST ↑/⎕WCALL 'GetTempPath' 4096 (4096⍴⎕TCNUL)
+:SELECT ⍙ACTION
+:CASE 'ADD' ⋄ ⍙R←⍙GitAdd ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Add [filenames]
+:CASE 'BRANCH' ⋄ ⍙R←⍙GitBranch ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Branch {Params}
+:CASE 'CLONE' ⋄ ⍙R←⍙GitClone ⍙RA ⍙TEMP ⍝ ]Git Clone ⍙NAME ⍙DEST ⍙URL
+:CASE 'COMMIT' ⋄ ⍙R←⍙GitCommit ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Commit [MESSAGE]
+:CASE 'DIFF' ⋄ ⍙R←⍙GitDiff ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Diff {PARAMS}
+:CASE 'FETCH' ⋄ ⍙R←⍙GitFetch ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Fetch {PARAMS}
+:CASE 'IGNORE' ⋄ ⍙R←⍙GitIgnore ⍙RA ⍙TEMP ⍙PDIR ⍝ ]GIT Ignore [filename]
+:CASE 'INIT' ⋄ ⍙R←⍙GitInit ⍙TEMP ⍙PDIR ⍝ ]Git Init
+:CASE 'LOG' ⋄ ⍙R←⍙GitLog ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Log {Params}
+:CASE 'MERGE' ⋄ ⍙R←⍙GitMerge ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Merge {PARAMS}
+:CASE 'PULL' ⋄ ⍙R←⍙GitPull ⍙TEMP ⍙PDIR ⍝ ]Git Pull
+:CASE 'PUSH' ⋄ ⍙R←⍙GitPush ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Push {PARAMS}
+:CASE 'REMOTE' ⋄ ⍙R←⍙GitRemote ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Remote {SubAction} ...
+:CASE 'REMOVE' ⋄ ⍙R←⍙GitRemove ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Remove
+:CASE 'RESET' ⋄ ⍙R←⍙GitReset ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Reset
+:CASE 'RESTORE' ⋄ ⍙R←⍙GitRestore ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Restore [PARAMS]
+:CASE 'STASH' ⋄ ⍙R←'NOT YET IMPLEMENTED' ⍝ ⍙R←⍙GitStash ⍙RA ⍙TEMP
+:CASE 'STATUS' ⋄ ⍙R←⍙GitStatus ⍙PDIR ⍙TEMP ⍝ ]Git Status
+:CASE 'SWITCH' ⋄ ⍙R←⍙GitSwitch ⍙RA ⍙TEMP ⍙PDIR ⍝ ]Git Switch [PARAMS]
+:ELSE ⋄ ⍙R←'UNKNOWN CALL'
+:ENDSELECT
+ ⍙RESULT←⍙R

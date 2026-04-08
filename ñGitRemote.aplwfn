@@ -1,0 +1,53 @@
+ ⍙R←⍙GitRemote ⍙RA;⍙ARG;⍙C;⍙I;⍙N;⍙PDIR;⍙TEMP;⍙TYP;⍙U
+⍝ Manage the list of remote git branches maintained.
+
+⍝ Syntaxes:
+⍝ ⍙R←⍙GitRemote '' - Show current list of remote branches
+
+⍝ ⍙R←⍙GitRemote 'Add <Alias> <URL>' ⍙TEMP - Add a remote URL
+
+⍝ ⍙R←⍙GitRemote 'Remove <Alias>' ⍙TEMP - Remove a remote URL
+
+⍝ ⍙R←⍙GitRemote 'Rename <OldAlias> <NewAlias>' ⍙TEMP
+⍝   - Rename a remote branch (for your list of remote's only)
+
+⍝ Requires: ⍙COMMAND
+
+⍝ Parse ⍙RA:
+⍝ 1⊃ Call name and params (e.g. 'Add MyRepo github.com/myname/myrepo')
+⍝ 2⊃ Temp dir for ⍙COMMAND
+⍝ 3⊃ WS's parent directory (must contain .git hidden folder from init/clone)
+ (⍙ARG ⍙TEMP ⍙PDIR)←⍙RA
+
+⍝ Parse call type from ⍙ARG (and delete trailing blanks):
+:if 0<⍴⍙TYP←⍙ARG ⋄ ⍙I←⍙TYP⍳' '
+   ⍙TYP←(¯1+⍙I)↑⍙ARG ⋄ ⍙ARG←⍙I↓⍙ARG
+   ⍙ARG←(⌽~^\⌽' '=⍙ARG)/⍙ARG ⍝ Delete trailing blanks
+   ⍙TYP←⎕WCALL 'CharUpper' ⍙TYP ⍝ Case insensitive call type
+:endif
+
+:SELECT ⍙TYP
+:CASE '' ⍝ Show list of managed remote branches:
+   ⍙C←'git remote -v' ⍝ -v: verbose (with url)
+:CASE 'ADD' ⍝ Add a remote branch to the list of managed branches:
+  ⍝ Split what is left of ⍙ARG into the <Alias> and <URL>:
+   ⍙I←⍙ARG⍳' ' ⋄ ⍙N←(¯1+⍙I)↑⍙ARG ⋄ ⍙U←⍙I↓⍙ARG
+  :If 0∊∊⍴¨⍙U,⍙N ⍝ Return an error message if missing alias or URL
+     ⍙R←'Bad argument; Argument should look like: "Add <Alias> <URL>"'
+     →0
+  :EndIf
+   ⍙C←'git remote add ',⍙N,' ',⍙U
+:CASE 'REMOVE' ⍝ Remove a branch from the list of remotely managed repos
+   ⍙C←'git remote remove ',⍙ARG
+:CASE 'RENAME' ⍝ Rename a remotely managed branch (locally)
+  ⍝ Split what is left of ⍙ARG into the <OldAlias> and <NewAlias>:
+   ⍙I←⍙ARG⍳' ' ⋄ ⍙U←(¯1+⍙I)↑⍙ARG ⋄ ⍙N←⍙I↓⍙ARG
+  :If 0∊⍴¨⍙U,⍙N ⍝ Return an error message if missing alias or URL
+     ⍙R←'Bad argument; Argument should look like: "Rename <OldAlias> <NewAlias>"'
+     →0
+  :EndIf
+   ⍙C←'git remote rename ',⍙U,' ',⍙N
+:ENDSELECT
+ ⍙R←⍙TEMP ⍙COMMAND ⍙PDIR ⍙C ⍝ Execute the specified git command
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴⍙R ⋄ ⍙R←⊃((1,1↓⎕TCLF=⍙R)⎕PENCLOSE ⍙R)~¨⎕TCLF ⋄ :endif

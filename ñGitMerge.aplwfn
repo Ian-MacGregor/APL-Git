@@ -1,0 +1,26 @@
+ R←⍙GitMerge ⍙RA;⍙CMD;⍙TEMP;⍙WS
+
+⍝ Merge any changes to git tracked files fetched from the remote repo
+⍝ with your current code.  Inserts merge conflict indicators into files
+⍝ where merges cannot be done automatically.  To resolve these, remove
+⍝ the added markers from the code manually (fixing the merge) and then
+⍝ once a finalized piece of code/object is ready, ]Git Add <OBJ> to
+⍝ mark the merge conflict as resolved and then ]Git Commit and ]Git Push
+⍝ to finalize the merge.
+⍝
+⍝ [TLDR: UMerges fetched code with local code]
+
+⍝ Syntax: R←⍙GitMerge [PARAMS] [TEMP] [WS]
+⍝   TEMP: Temp dir for use by ⍙COMMAND
+⍝     WS: WS' parent dir
+⍝ PARAMS: Additional modifiers for the merge command like branch names
+⍝         (e.g. ]Git Merge branch-name to merge "branch-name" into the
+⍝         current branch)
+
+ (⍙RA ⍙TEMP ⍙WS)←⍙RA
+⍝ Build ⎕CMD argument to pass to ∆_COMMAND
+ ⍙CMD←'git merge ',⍙RA
+⍝ Returns output from the ⎕CMD call:
+ R←⍙TEMP ⍙COMMAND ⍙WS ⍙CMD
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif

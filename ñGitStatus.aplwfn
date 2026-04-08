@@ -1,0 +1,17 @@
+R←⍙GitStatus ⍙RA;⍙CMD;⍙PDIR;⍙TEMP
+
+⍝ Return the Git status of the current workspace's Git managed
+⍝ directory (i.e. a list of altered files).  Equivalent to the
+⍝ "git status" Windows command.
+
+⍝ Syntax: ⍙GitStatus PDIR TEMP
+⍝   PDIR: Parent Directory (i.e. where to call "git status")
+⍝   TEMP: Temp dir (for ⍙COMMAND)
+
+ (⍙PDIR ⍙TEMP)←⍙RA ⍝ Parent dir; Temp dir
+⍝ Build ⎕CMD argument to pass to ∆_COMMAND
+ ⍙CMD←'git status'
+⍝ Returns output from the ⎕CMD call:
+ R←⍙TEMP ⍙COMMAND ⍙PDIR ⍙CMD
+⍝ Deal with horrendous ⎕TCLF placement:
+:if 0<⍴R ⋄ R←⊃((1,1↓⎕TCLF=R)⎕PENCLOSE R)~¨⎕TCLF ⋄ :endif
