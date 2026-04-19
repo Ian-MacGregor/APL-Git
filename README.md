@@ -147,7 +147,7 @@ Using ']GIT Add' will produce the following files in your workspace's parent dir
 .../FunctionTwo.aplwfn
 ```
 
-These case codes have no effect beyond making the file names unique within a directory and they control the case of objects brought into the workspace with a ']GIT PULL' or with ]FROMTXT.
+These case codes have no effect beyond making the file names unique within a directory and controlling the case of objects brought into the workspace with a ']GIT PULL' or with ]FROMTXT.
 
 ## Included Objects
 
