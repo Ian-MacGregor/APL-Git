@@ -31,13 +31,13 @@
   ⍝ ... and skip anything related to the ]Git commands:
    ⍙U←⎕NL 3 ⋄ ⍙U←(⊂[2](~(4↑[2]⍙U)^.='⍙Git')⌿⍙U)~¨' '
    ⍙O←⍙O,⍙U~⍙T
-  ⍝ Are there case conflicts in this ws? If so, use case code (⍙C) to
-  ⍝ append octal suffix denoting case of the characters in the object
-  ⍝ name.  This solves the issue of Windows not allowing file names to
-  ⍝ only differ in case:
-   ⍙N←⍴⍙O ⋄ ⍙C←⍙N≠⍴∪⎕WCALL¨(⊂⊂'CharUpper'),¨⊂¨⍙O
-   ⍙I←0 ⋄ ⍙R←''
+  ⍝ Loop by object to write:
+   ⍙N←⍴⍙O ⋄ ⍙I←0 ⋄ ⍙R←'' ⍝ # of objs ⋄ Counter ⋄ Result
   :While ⍙N≥⍙I←⍙I+1 ⍝ Loop for each obj to write
+    ⍝ If another object that we are writing has a name that only differs
+    ⍝ from this object's name by case, use case coding (windows file
+    ⍝ names must differ by more than just case, unlike APL objects):
+     ⍙C←⎕WCALL¨(⊂⊂'CharUpper'),¨⊂¨⍙O ⋄ ⍙C←1<+/⍙C∊⍙C[⍙I]
     ⍝ 1: Always overwrite when writing entire ws:
      ⍙R←⍙R,((⍙I≠1)⍴⎕TCNL),⍙P APL2TXT (⍙I⊃⍙O) 1 ⍙C
   :EndWhile
