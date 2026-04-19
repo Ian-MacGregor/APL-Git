@@ -1,0 +1,67 @@
+ R←LA ⍙EZBase VALS;CHR;CVR;DEC;FBASE;I;N;T;TBASE;QUO;REM
+⍝ Convert a given value from a given base to another.  Returning a cvec
+⍝ or cvec nest with each value represented in the minimum number of
+⍝ digits:
+
+⍝ (1⊃LA): From base (int 2-35)
+⍝ (2⊃LA): To base (int 2-35)
+
+⍝ VALS: Values to convert (can be scalar int, vec of ints, a cvec, or a
+⍝       nest of cvecs)
+
+⍝ Returns a bare cvec if VALS is passed as a scalar int or a bare cvec
+⍝ otherwise, returns a nest of char vecs
+
+⍝ Examples:
+
+⍝ 253 from decimal to octal: '375'←10 8 ⍙EZBase 253
+⍝ 4D2 from hex to decimal: '1234'←16 10 ⍙EZBase '4D2'
+⍝ 1234 and 2324 from decimal to hex: ('4D2' '914')←10 16 ⍙EZBase 1234 2324
+
+ (FBASE TBASE)←LA ⍝ From Base; To Base
+⍝ Char vec result? (source val passed as cvec or scalar int):
+ CVR←(82=⎕DR VALS)∨⍬≡⍴VALS
+:if ∨/FBASE TBASE∊0 1 ⋄ :orif ∨/FBASE TBASE>35 ⋄ ⎕ERROR 'DOMAIN ERROR' ⋄ :endif
+⍝ Convert given values to a char mat:
+:If 82=T←⎕DR VALS
+  :If ⍬≡⍴VALS ⋄ VALS←1 1⍴VALS ⍝ Char → Cmat
+  :Else ⋄ VALS←,[.5]VALS      ⍝ Cvec → Cmat
+  :Endif
+:ElseIf T=326 ⋄ VALS←⊃VALS    ⍝ Cnest→ Cmat
+:ElseIf T∊11 323
+  :If CVR ⋄ VALS←,[.5]⍕VALS   ⍝ ScInt→ Cmat
+  :Else ⋄ VALS←⊃⍕¨VALS        ⍝ IntVc→ Cmat
+  :EndIf
+:Else ⋄ ⎕ERROR 'DOMAIN ERROR'
+:EndIf
+ VALS←⎕WCALL 'CharUpper' VALS ⍝ Make sure any chars are upper (2fe3→2FE3)
+⍝ Return formatted VALS (cvecs w/o spaces) if from/to are the same:
+:if FBASE=TBASE ⋄ R←⊂[1]VALS ⋄ R←R~¨' ' ⋄ :endif
+⍝ Char representations of values from 0-35 (+1):
+ CHR←'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ ' ⍝ CHR[37]=' '
+
+⍝ DEC: Integer decimal values of rows of VALS
+:If FBASE=10 ⋄ DEC←∊⎕FI¨⊂[2]VALS
+:Else ⍝ Convert to base 10
+  ⍝ RJUST and reverse (to put 1's place in leftmost col:
+   VALS←⌽(+/∨\' '≠⌽VALS)⌽VALS
+   I←CHR⍳VALS ⋄ T←I=37 ⋄ ((,T)/,I)←0 ⍝ Consider ' ' as 0
+  :if 1∊I>37 ⋄ ⎕ERROR 'DOMAIN ERROR' ⋄ :endif
+   N←¯1↑⍴VALS ⍝ Max number of places/digits
+   DEC←+/(FBASE*(⍳N)-1)×[2]0⌈I-1 ⍝ (DIGIT × BASE * PLACE)
+:EndIf
+
+:If TBASE=10 ⋄ R←⍕¨DEC ⍝ Already in base 10!
+:Else ⍝ Convert from base 10 to specified base (TBASE):
+  ⍝ Use successive division to calculate each digit in new base.
+  ⍝ Start by dividing the decimal value by the desired base (use the
+  ⍝ quotient in subsequent iterations) and noting the remainder,
+  ⍝ continue this process from the 1's place upwards:
+   QUO←DEC ⋄ R←((⍴DEC),0)⍴''
+  :repeat ⋄ REM←TBASE∣QUO ⋄ R←CHR[1+REM],R ⋄ :until ^/0=QUO←(QUO-REM)÷TBASE
+  ⍝ Delete leading 0's and convert to nest/cvec (keep at least one for
+  ⍝ actual 0 values though):
+   T←R≠'0' ⋄  T←∨\T ⋄ (¯1↑[2]T)←1 ⋄ R←(,T×[⎕IO]1+⍳↑⍴T)⊂,R
+:EndIf
+⍝ Format result accoring to provided format of VALS:
+:if CVR ⋄ R←∊R ⋄ :endif

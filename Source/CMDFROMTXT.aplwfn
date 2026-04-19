@@ -19,6 +19,8 @@
 ⍝ given path (/P) are imported (i.e. you can fill an clear ws from a
 ⍝ directory filled with APL+Win text files with ]FROMTXT /P='C:\REPO')
 
+⍝ Requires: ⍙EZBase
+
  ⎕IO←1 ⋄ ⍙E←⎕ELX ⍝ Pass-through localization of ⎕ELX
 ⍝ Input path (or ''):
 :if 1∊⍙T←⍙RA ⎕SS '/P=' ⋄ ⍙T←3↓(∨\⍙T)/⍙RA ⋄ ⍙P←(^\⍙T≠' ')/⍙T ⋄ :else ⋄ ⍙P←'' ⋄ :endif
@@ -56,7 +58,7 @@
    ⍙U←(⍙I↑¨⍙O)∊'.aplwfn' '.aplwcv' '.aplwvr'
    ⍙O←(⍙U/⍙I)↓¨⍙U/⍙O
   ⍝ Skip those objs in this list for logistical reasons:
-   ⍙T←'TXT2APL' 'CMDFROMTXT' '⍙DEB' '⍙F' '⍙FOPEN' '⍙FTNUM' '⍙GETOPT' '⍙IFERRIN' '⍙MATIOTA' '⍙MATRIFY' '⍙OUT' '⍙OVER' '⍙PDEF' '⍙PNAMES' '⍙TIEUF' '⍙UCASE' '⍙UCMD' '⍙UCMD2'
+   ⍙T←'TXT2APL' 'CMDFROMTXT' '⍙DEB' '⍙F' '⍙FOPEN' '⍙FTNUM' '⍙GETOPT' '⍙IFERRIN' '⍙MATIOTA' '⍙MATRIFY' '⍙OUT' '⍙OVER' '⍙PDEF' '⍙PNAMES' '⍙TIEUF' '⍙UCASE' '⍙UCMD' '⍙UCMD2' '⍙EZBase'
    ⍙O←⍙O~⍙T
 
   ⍝ Loop for each obj to define:
@@ -69,7 +71,7 @@
       ⍝ Drop case code from obj name, lower case everything
        ⍙U←⎕WCALL 'CharLower' (⍙V↓⍙U)
       ⍝ Decode octal case code to bits indicating case:
-       ⍙V←⌽((⍴⍙U)⍴2)⊤+/(⌽8*¯1+⍳⍴⍙C)×∊⎕FI¨⍙C
+       ⍙V←'1'=⌽(-⍴⍙U)↑((⍴⍙U)⍴0),8 2 ⍙EZBase ⍙C
       ⍝ Use case code bits to uppercase select chars:
        (⍙V/⍙U)←⎕WCALL 'CharUpper' (⍙V/⍙U)
     :EndIf

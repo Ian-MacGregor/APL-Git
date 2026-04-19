@@ -23,6 +23,8 @@
 ⍝ Used like:
 ⍝ ⍙_R←'C:\temp\codedir' TXT2APL 'CMIOTA' 1
 
+⍝ Requires: ⍙EZBase
+
 ⎕IO←1 ⋄ (⍙_OBJ ⍙_OW)←⍙_RA ⍝ Object name; Overwrite?
 :if ⍙_OW<0≠⎕NC ⍙_OBJ ⋄ ⍙_R←'"',⍙_OBJ,'" already exists.' ⋄ →0 ⋄ :endif
 ⍝ ⍙_PATH not provided? Use current ws path:
@@ -54,7 +56,9 @@
  ⍙_U←⊂⎕WCALL 'CharUpper' ⍙_OBJ ⋄ ⍙_NAMES←⍙_U,¨⍙_T
 ⍝ Case code for object (Bits of uppercase letters, reversed, decimal,
 ⍝ then octal):
- ⍙_CC←'-',∊⍕¨0 8⊤(2⊥⌽⍙_OBJ∊⎕AV[65+⍳26])
+ ⍙_V←∊⍕¨⌽⍙_OBJ∊⎕AV[65+⍳26] ⍝ Bits of upper chars, reversed
+⍝ e.g. Foo -> Foo-1, foo -> foo-0)
+ ⍙_CC←'-',2 8 ⍙EZBase ⍙_V ⍝ Convert to octal (8) from binary (2) and format
 ⍝ Consider case coded file names as well (e.g. Foo-01.APLWFN):
  ⍙_NAMES←⍙_NAMES,⍙_U,¨(⊂⍙_CC),¨⍙_T
  ⍙_U←⎕LIB ⍙_PATH ⍝ Contents of source path

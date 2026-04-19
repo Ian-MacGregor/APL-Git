@@ -1,0 +1,24 @@
+ CaseCode NAME;B;CC;D;O;T
+⍝ Demonstrate the case coding process used by ]GIT/]TOTXT/]FROMTXT
+⍝ using any supplied char vec as a source (NAME).
+⍝ No results.  Prints steps to console.
+
+⍝ Requires: ⍙EZBase
+
+ ⎕←'Supplied name: ',NAME,'; Characters: ',⍕⍴NAME
+ B←∊⍕¨NAME∊⎕AV[65+⍳26] ⋄ ⎕←'Binary: ',B
+ B←⌽B                  ⋄ ⎕←'Binary Reversed: ',B
+ D←2 10 ⍙EZBase B      ⋄ ⎕←'Decimal: ',D
+ O←10 8 ⍙EZBase D      ⋄ ⎕←'Octal: ',O
+ CC←'-',O              ⋄ ⎕←'Result: ',NAME←NAME,CC
+⍝ Now we decode the example to prove it has worked:
+ ⎕←'Decode Case Coded Name...'
+ O←(1+-(⌽NAME)⍳'-')↑NAME             ⋄ ⎕←'Octal: ',O
+ D←8 10 ⍙EZBase O                    ⋄ ⎕←'Decimal: ',D
+ T←¯1+NAME⍳'-'
+ B←(-T)↑(T⍴'0'),10 2 ⍙EZBase D       ⋄ ⎕←'Binary Reversed: ',⍕B
+ B←⌽B                                ⋄ ⎕←'Binary: ',⍕B
+ B←B='1' ⍝ Convert to ⎕DR=11
+⍝ Use the binary code to decode the casing of the name:
+ NAME←⎕WCALL 'CharLower' (T↑NAME) ⋄ (B/NAME)←⎕WCALL 'CharUpper' (B/NAME)
+ ⎕←'Result: ',NAME

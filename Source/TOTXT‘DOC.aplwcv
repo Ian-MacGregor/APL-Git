@@ -33,11 +33,11 @@ If there are objects in the workspace whose names differ only in case
 (e.g. Foo and foo), case codes are automatically appended to the output
 files to allow for two objects with similar names to coexist in one
 Windows directory as they do in an APL+Win workspace.  For example,
-a workspace containing <Foo> and <foo> would produce the following
-files:
+a workspace containing <FooName> and <fooname> would produce the
+following files:
 
-  Foo-04.aplwfn
-  foo-00.aplwfn
+  FooName-11.aplwfn
+  fooname-0.aplwfn
 
 The case code suffix is an octal encoding of the object name's character
 case statuses.

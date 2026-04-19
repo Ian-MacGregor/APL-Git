@@ -27,9 +27,9 @@
   ⍝ Object names; skip vars starting with ⍙:
    ⍙O←⎕NL 2 ⋄ ⍙O←(⊂[2]('⍙'≠,1↑[2]⍙O)⌿⍙O)~¨' '
   ⍝ ... and skip UCMD related fns, i.e. those in this list:
-   ⍙T←'APL2TXT' 'CMDGIT' 'CMDTOTXT' '⍙DEB' '⍙F' '⍙FOPEN' '⍙FTNUM' '⍙GETOPT' '⍙IFERRIN' '⍙MATIOTA' '⍙MATRIFY' '⍙OUT' '⍙OVER' '⍙PDEF' '⍙PNAMES' '⍙TIEUF' '⍙UCASE' '⍙UCMD' '⍙UCMD2'
+   ⍙T←'APL2TXT' 'CMDGIT' 'CMDTOTXT' '⍙DEB' '⍙F' '⍙FOPEN' '⍙FTNUM' '⍙GETOPT' '⍙IFERRIN' '⍙MATIOTA' '⍙MATRIFY' '⍙OUT' '⍙OVER' '⍙PDEF' '⍙PNAMES' '⍙TIEUF' '⍙UCASE' '⍙UCMD' '⍙UCMD2' '⍙EZBase'
   ⍝ ... and skip anything related to the ]Git commands:
-   ⍙U←⎕NL 3 ⋄ ⍙U←(⊂[2]((4↑[2]⍙U)^.≠'⍙Git')⌿⍙U)~¨' '
+   ⍙U←⎕NL 3 ⋄ ⍙U←(⊂[2](~(4↑[2]⍙U)^.='⍙Git')⌿⍙U)~¨' '
    ⍙O←⍙O,⍙U~⍙T
   ⍝ Are there case conflicts in this ws? If so, use case code (⍙C) to
   ⍝ append octal suffix denoting case of the characters in the object
