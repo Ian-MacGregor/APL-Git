@@ -1,6 +1,6 @@
 # ]Git — A Git Interface for APL+Win
 
-A user command that brings full Git version control to [APL+Win](https://www.apl.com/) — no command line required. Manage repositories, branches, commits, diffs, and merges entirely from within the APL+Win session.
+A user command that brings full Git version control to [APL+Win](http://www.apl2000.com/index.php) — no command line required. Manage repositories, branches, commits, diffs, and merges entirely from within the APL+Win session.
 
 `]Git` works by calling the Git for Windows application under the hood and bridging the gap between APL+Win workspaces and Git's text-file-based workflow. APL objects are automatically converted to and from UTF-8 text files (`.aplwfn`, `.aplwcv`, `.aplwvr`) so that Git can track them with full diff and merge support.
 
