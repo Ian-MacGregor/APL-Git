@@ -130,6 +130,25 @@ Edit the code or text file to resolve the conflict, then stage and commit the fi
 | `.w3` | APL+Win workspace (binary — not tracked by Git) |
 | `.sf` | APL+Win user command file (binary distribution format) |
 
+## Case Codes
+APL+Win allows for case-sensitive object names such that <Foo> and <foo> can coexist in the same workspace without causing a naming conflict.  However, Windows does not allow for file names to differ only by case.  This means that if you have a workspace that has objects whose names differ only by case, we cannot write a text file representing each object to the same directory for ]GIT to manage without doing something to differentiate the file names.  ]TOTXT and ]FROMTXT handle this for ]GIT by detecting possible file naming conflicts due to case and automatically applying numeric suffixes representing the object name's character cases to the text file names (case codes).  These case codes are applied in the same fashion as those used by Dyalog APL's ]LINK command (which is an automated form of the ]FROMTXT/]TOTXT commands in this repo).
+
+For example, if you have a workspace with these functions in it:
+
+```
+FunctionOne, FUNCTIONONE, and FunctionTwo
+```
+
+Using ']GIT Add' will produce the following files in your workspace's parent directory:
+
+```
+.../FunctionOne-401.aplwfn
+.../FUNCTIONONE-3777.aplwfn
+.../FunctionTwo.aplwfn
+```
+
+These case codes have no effect beyond making the file names unique within a directory and they control the case of objects brought into the workspace with a ']GIT PULL' or with ]FROMTXT.
+
 ## Included Objects
 
 <details>
