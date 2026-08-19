@@ -31,11 +31,11 @@
 :If 0=⍴⍙_PATH
   :If 0≠⍴⍙_PATH←⎕WSID ⍝ Not a clear ws?
     ⍝ Logic from <TODOS> for dealing with APL+Win Lib No.s:
-    :If ↑⎕VI ⍙_PATH ⍝ File with APL library number?
+    :If ⎕FIRST ⎕VI ⍙_PATH ⍝ File with APL library number?
        ⍙_PATH←(-¯1+(⌽⍙_PATH)⍳' ')↓⍙_PATH ⍝ Path num before ws name
       ⍝ Delete lib no. and trailing blanks (allow for '18 XYZ\3M42A.PRN'):
        ⍙_T←⍙_PATH=' ' ⋄ ⍙_U←(-+/^\⌽⍙_T)↓(1<+\2>/1,⍙_T)/⍙_PATH
-       ⍙_L←↑⎕FI ⍙_PATH ⋄ ⍙_T←⌊0⌈⍙_L⌊2147483647 ⋄ ⍙_V←⎕LIBD ⍙_T
+       ⍙_L←⎕FIRST ⎕FI ⍙_PATH ⋄ ⍙_T←⌊0⌈⍙_L⌊2147483647 ⋄ ⍙_V←⎕LIBD ⍙_T
       ⍝ If lib no. invalid or not found, use {currentdir}; handle 'D:':
       :If ⍙_L≠⍙_T ⋄ :OrIf 0∊⍴⍙_V
          ⍙_V←⎕CHDIR ''
@@ -56,7 +56,7 @@
  ⍙_U←⊂⎕WCALL 'CharUpper' ⍙_OBJ ⋄ ⍙_NAMES←⍙_U,¨⍙_T
 ⍝ Case code for object (Bits of uppercase letters, reversed, decimal,
 ⍝ then octal):
- ⍙_V←∊⍕¨⌽⍙_OBJ∊⎕AV[65+⍳26] ⍝ Bits of upper chars, reversed
+ ⍙_V←⎕ENLIST ⍕¨⌽⍙_OBJ∊⎕AV[65+⍳26] ⍝ Bits of upper chars, reversed
 ⍝ e.g. Foo -> Foo-1, foo -> foo-0)
  ⍙_CC←'-',2 8 ⍙EZBase ⍙_V ⍝ Convert to octal (8) from binary (2) and format
 ⍝ Consider case coded file names as well (e.g. Foo-01.APLWFN):
@@ -64,7 +64,7 @@
  ⍙_U←⎕LIB ⍙_PATH ⍝ Contents of source path
  ⍙_U←⎕WCALL 'CharUpper' ⍙_U ⍝ Uppercase and mat→nest
  ⍙_T←+/∨\' '≠⌽⍙_U ⋄ ⍙_V←⍙_T↑¨⊂[2]⍙_U ⍝ Mat→Nest (delete trailing blanks)
- ⍙_I←↑(⍙_NAMES∊⍙_V)/⍳⍴⍙_NAMES ⍝ First matching file in ⍙_NAMES
+ ⍙_I←⎕FIRST (⍙_NAMES∊⍙_V)/⍳⍴⍙_NAMES ⍝ First matching file in ⍙_NAMES
 :if ⍙_I=0 ⋄ ⍙_R←'Source file for "',⍙_OBJ,'" not found in "',⍙_PATH,'".' ⋄ →0 ⋄ :endif
  ⍙_NAME←⍙_I⊃⍙_NAMES ⍝ Source file name
  ⍙_FILE←⍙_PATH,⍙_NAME ⍝ Full file name

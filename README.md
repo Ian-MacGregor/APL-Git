@@ -4,6 +4,8 @@ A user command that brings full Git version control to [APL+Win](http://www.apl2
 
 `]Git` works by calling the Git for Windows application under the hood and bridging the gap between APL+Win workspaces and Git's text-file-based workflow. APL objects are automatically converted to and from UTF-8 text files (`.aplwfn`, `.aplwcv`, `.aplwvr`) so that Git can track them with full diff and merge support.
 
+`]Git` works in )EVLEVEL 1 and 2 (it uses ⎕FIRST and ⎕ENLIST where appropriate instead of the monadic versions of ↑ and ∊).
+
 ## Prerequisites
 
 - **Git for Windows** — download from [git-scm.com](https://git-scm.com/downloads). During installation, link Git to your GitHub account for remote repository access.

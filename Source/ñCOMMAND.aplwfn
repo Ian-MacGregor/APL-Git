@@ -8,7 +8,7 @@
 
  (⍙PATH ⍙CMD)←⍙CMD ⍝ Path to execute in and command to execute
 :If 0≠⍴⍙PATH ⋄ ⍝ Set execution directory if passed
-  :if '\'=⍙T←↑⍙PATH ⋄ ⍙T←'' ⋄ :endif
+  :if '\'=⍙T←⎕FIRST ⍙PATH ⋄ ⍙T←'' ⋄ :endif
    ⍙T←⍙T ⎕CHDIR ⍙PATH ⍝ Change DOS directory
 :EndIf
 ⍝ Include trailing delim if needed:

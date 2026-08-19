@@ -30,21 +30,27 @@
    ⍙T←⍙P TXT2APL ⍙N (1∊⍙RA ⎕SS '/R') ⍝ Overwrite existing file?
 :Else ⍝ No object name → Write all objects in path (given path or ws
   ⍝ parent path) to the current workspace.
-  :If 0=⍴⍙P ⍝ No path passed? Use workspace's parent dir
+  :If 0=⍴⍙P ⍝ No path passed?
+    ⍝ Try a path within the workspace's parent dir named after this WS
+    ⍝ or a path of the same name in
     :If 0≠⍴⍙P←⎕WSID ⍝ Not a clear ws?
       ⍝ Logic from <TODOS> for dealing with APL+Win Lib No.s:
-      :If ↑⎕VI ⍙P ⍝ File with APL library number?
+      :If ⎕FIRST ⎕VI ⍙P ⍝ File with APL library number?
          ⍙P←(-¯1+(⌽⍙P)⍳' ')↓⍙P ⍝ Path num before ws name
         ⍝ Delete lib no. and trailing blanks (allow for '18 XYZ\3M42A.PRN'):
          ⍙T←⍙P=' ' ⋄ ⍙P←(-+/^\⌽⍙T)↓(1<+\2>/1,⍙T)/⍙P
-         ⍙U←↑⎕FI ⍙P ⋄ ⍙T←⌊0⌈⍙U⌊2147483647 ⋄ ⍙V←⎕LIBD ⍙T
+         ⍙U←⎕FIRST ⎕FI ⍙P ⋄ ⍙T←⌊0⌈⍙U⌊2147483647 ⋄ ⍙V←⎕LIBD ⍙T
         ⍝ If lib no. invalid or not found, use {currentdir}; handle 'D:':
         :If ⍙U≠⍙T ⋄ :OrIf 0∊⍴⍙V
            ⍙V←⎕CHDIR ''
         :ElseIf 0 1 ≡⍙V=':' ⋄ ⍙V←⎕CHDIR ⍙V
         :EndIf
          ⍙P←⍙V,('\'≠¯1↑⍙V)⍴'\' ⍝ Incl \ unless A:\ or C:\ ...
-      :Else ⋄ ⍙P←(-¯1+(⌽⎕WSID)⍳'\')↓⎕WSID ⍝ ⎕WSID not numeric lib
+        ⍝ Include dir named after the workspace (text dir should be
+        ⍝ sibling dir to WS):
+         ⍙P←⍙P,'\',(-¯1+(⌽⎕WSID)⍳' ')↑⎕WSID
+      :Else ⍝ ⎕WSID not numeric lib:
+         ⍙P←⎕WSID ⍝ Does not include extension (same name as txt dir)
       :EndIf
     :Else ⋄ ⎕ERROR 'PROVIDE A PATH (/P=) OR RUN THIS IN A NON-CLEAR WS!'
     :EndIf

@@ -32,7 +32,7 @@
 :CASE 'ADD' ⍝ Add a remote branch to the list of managed branches:
   ⍝ Split what is left of ⍙ARG into the <Alias> and <URL>:
    ⍙I←⍙ARG⍳' ' ⋄ ⍙N←(¯1+⍙I)↑⍙ARG ⋄ ⍙U←⍙I↓⍙ARG
-  :If 0∊∊⍴¨⍙U,⍙N ⍝ Return an error message if missing alias or URL
+  :If 0∊⎕ENLIST ⍴¨⍙U,⍙N ⍝ Return an error message if missing alias or URL
      ⍙R←'Bad argument; Argument should look like: "Add <Alias> <URL>"'
      →0
   :EndIf

@@ -41,7 +41,7 @@
  CHR←'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ ' ⍝ CHR[37]=' '
 
 ⍝ DEC: Integer decimal values of rows of VALS
-:If FBASE=10 ⋄ DEC←∊⎕FI¨⊂[2]VALS
+:If FBASE=10 ⋄ DEC←⎕ENLIST ⎕FI¨⊂[2]VALS
 :Else ⍝ Convert to base 10
   ⍝ RJUST and reverse (to put 1's place in leftmost col:
    VALS←⌽(+/∨\' '≠⌽VALS)⌽VALS
@@ -61,7 +61,7 @@
   :repeat ⋄ REM←TBASE∣QUO ⋄ R←CHR[1+REM],R ⋄ :until ^/0=QUO←(QUO-REM)÷TBASE
   ⍝ Delete leading 0's and convert to nest/cvec (keep at least one for
   ⍝ actual 0 values though):
-   T←R≠'0' ⋄  T←∨\T ⋄ (¯1↑[2]T)←1 ⋄ R←(,T×[⎕IO]1+⍳↑⍴T)⊂,R
+   T←R≠'0' ⋄  T←∨\T ⋄ (¯1↑[2]T)←1 ⋄ R←(,T×[⎕IO]1+⍳⎕FIRST ⍴T)⊂,R
 :EndIf
 ⍝ Format result accoring to provided format of VALS:
-:if CVR ⋄ R←∊R ⋄ :endif
+:if CVR ⋄ R←⎕ENLIST R ⋄ :endif

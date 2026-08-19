@@ -16,18 +16,18 @@
 ⍝ Get workspace path
  (⍙RA ⍙TEMP ⍙PDIR)←⍙RA ⍝ ⍙RA: Objects; ⍙TEMP: TempPath; ⍙PDIR: Parent dir
 ⍝ Update the workspace path's text files:
-:If '.'≡↑⍙RA~' ' ⋄ ⍙T←⎕UCMD 'TOTXT' ⍝ All objects
+:If '.'≡⎕FIRST ⍙RA~' ' ⋄ ⍙T←⎕UCMD 'TOTXT' ⍝ All objects
 :ElseIf ∨/⍙T←'/F='⍷⍙RA ⋄ ⍙RA←3↓(∨\⍙T)/⍙RA ⍝ Specific file
 :Else ⍝ Specific object(s) {need to run ]TOTXT then git add the files}
    ⍙T←⎕UCMD 'TOTXT ',⍙RA,' /R'
   ⍝ Parse ]TOTXT result to determine created files:
   ⍝ ]TOTXT Foo Goo → '"C:\TEMP\Foo.aplwcv" created.',⎕TCNL,'"C:\TEMP\Goo.aplwcv" created.'
-   ⍙U←∨/'created'⍷⊃⍙V←(1,¯1↓⍙T∊⎕TCNL) ⎕PENCLOSE ⍙T
+   ⍙U←∨/' created.'⍷⊃⍙V←(1,¯1↓⍙T∊⎕TCNL) ⎕PENCLOSE ⍙T
   ⍝ Drop the 'created.' portion of each result:
    ⍙V←¯10↓¨⍙U/⍙V
   ⍝ Take the file name from each result:
    ⍙RA←(1+-(⌽¨⍙V)⍳¨'\')↑¨⍙V
-   ⍙RA←¯1↓∊⍙RA,¨' '
+   ⍙RA←¯1↓⎕ENLIST ⍙RA,¨' '
 :EndIf
  ⍙CMD←'git add ',⍙RA
 ⍝ Returns output from the ⎕CMD call:

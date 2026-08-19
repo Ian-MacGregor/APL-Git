@@ -6,11 +6,11 @@
 ⍝ Requires: ⍙EZBase
 
  ⎕←'Supplied name: ',NAME,'; Characters: ',⍕⍴NAME
- B←∊⍕¨NAME∊⎕AV[65+⍳26] ⋄ ⎕←'Binary: ',B
- B←⌽B                  ⋄ ⎕←'Binary Reversed: ',B
- D←2 10 ⍙EZBase B      ⋄ ⎕←'Decimal: ',D
- O←10 8 ⍙EZBase D      ⋄ ⎕←'Octal: ',O
- CC←'-',O              ⋄ ⎕←'Result: ',NAME←NAME,CC
+ B←⎕ENLIST ⍕¨NAME∊⎕AV[65+⍳26] ⋄ ⎕←'Binary: ',B
+ B←⌽B                         ⋄ ⎕←'Binary Reversed: ',B
+ D←2 10 ⍙EZBase B             ⋄ ⎕←'Decimal: ',D
+ O←10 8 ⍙EZBase D             ⋄ ⎕←'Octal: ',O
+ CC←'-',O                     ⋄ ⎕←'Result: ',NAME←NAME,CC
 ⍝ Now we decode the example to prove it has worked:
  ⎕←'Decode Case Coded Name...'
  O←(1+-(⌽NAME)⍳'-')↑NAME             ⋄ ⎕←'Octal: ',O
