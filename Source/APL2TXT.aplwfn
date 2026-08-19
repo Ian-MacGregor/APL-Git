@@ -296,11 +296,11 @@
 :If 0=⍴⍙_PATH
   :If 0≠⍴⍙_PATH←⎕WSID ⍝ Not a clear ws?
     ⍝ Logic from <TODOS> for dealing with APL+Win Lib No.s:
-    :If ↑⎕VI ⍙_PATH ⍝ File with APL library number?
+    :If ⎕FIRST ⎕VI ⍙_PATH ⍝ File with APL library number?
        ⍙_PATH←(-¯1+(⌽⍙_PATH)⍳' ')↓⍙_PATH ⍝ Path num before ws name
       ⍝ Delete lib no. and trailing blanks (allow for '18 XYZ\3M42A.PRN'):
        ⍙_T←⍙_PATH=' ' ⋄ ⍙_PATH←(-+/^\⌽⍙_T)↓(1<+\2>/1,⍙_T)/⍙_PATH
-       ⍙_L←↑⎕FI ⍙_PATH ⋄ ⍙_T←⌊0⌈⍙_L⌊2147483647 ⋄ ⍙_V←⎕LIBD ⍙_T
+       ⍙_L←⎕FIRST ⎕FI ⍙_PATH ⋄ ⍙_T←⌊0⌈⍙_L⌊2147483647 ⋄ ⍙_V←⎕LIBD ⍙_T
       ⍝ If lib no. invalid or not found, use {currentdir}; handle 'D:':
       :If ⍙_L≠⍙_T ⋄ :OrIf 0∊⍴⍙_V
          ⍙_V←⎕CHDIR ''
@@ -353,7 +353,7 @@
 ⍝ If v19 is in use, use ⎕CV (for speed) else, use DTBV logic:
 :If 19≤⎕FI 2↑⎕SYSVER ⋄ ⍙_DATA←⎕TCLF ⎕CV ⍙_DATA
 :Else ⋄ ⍙_U←+/∨\' '≠⌽⍙_DATA ⋄ ⍙_DATA←⍙_U↑¨⊂[⎕IO+1]⍙_DATA
-   ⍙_DATA←∊⍙_DATA,¨⎕TCLF
+   ⍙_DATA←⎕ENLIST ⍙_DATA,¨⎕TCLF
 :EndIf
 ⍝ Convert from ⎕AV internal UCS structure to UTF-8 (unicode):
  ⍙_TXT←'X-AV-UCS' 'UTF-8' ⎕UCS ⍙_DATA ⍝ Now we have unicode chars
@@ -364,7 +364,7 @@
 :If ⍙_CC
   ⍝ Bits of uppercase letters of obj name, reversed, converted to
   ⍝ decimal, then to octal (e.g. Foo -> Foo-10, foo -> foo-00) :
-   ⍙_CC←'-',∊⍕¨0 8⊤(2⊥⌽⍙_OBJ∊⎕AV[65+⍳26])
+   ⍙_CC←'-',⎕ENLIST ⍕¨0 8⊤(2⊥⌽⍙_OBJ∊⎕AV[65+⍳26])
 :Else ⋄ ⍙_CC←'' ⍝ No case code
 :EndIf
 
@@ -374,7 +374,7 @@
  ⍙_TIE←⎕NNUMS,⎕XNNUMS ⋄ ⍙_TIE←-((⍳⍴⍙_TIE)∊∣⍙_TIE)⍳0
 
 ⍝ Does the file already exist?:
-:If 1∊⍙_NAME⍷⎕LIB ⍙_PATH
+:If 1∊(⍙_NAME,' ')⍷(⎕LIB ⍙_PATH),' '
   :If ⍙_OW ⍝ Overwrite exising file?
      ⍙_FILE ⎕XNTIE ⍙_TIE
      ⍙_FILE ⎕XNERASE ⍙_TIE
