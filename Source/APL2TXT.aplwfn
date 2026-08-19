@@ -361,10 +361,9 @@
 ⍝ Add a case code? This is for workspace's with functions whose names
 ⍝ only differ by case (e.g. Foo vs foo) as Windows does not allow for
 ⍝ filenames that differ only in case:
-:If ⍙_CC
-  ⍝ Bits of uppercase letters of obj name, reversed, converted to
-  ⍝ decimal, then to octal (e.g. Foo -> Foo-10, foo -> foo-00) :
-   ⍙_CC←'-',⎕ENLIST ⍕¨0 8⊤(2⊥⌽⍙_OBJ∊⎕AV[65+⍳26])
+:If ⍙_CC ⋄ ⍙_T←⎕ENLIST ⍕¨⌽⍙_OBJ∊⎕AV[65+⍳26] ⍝ Bits of upper chars, reversed
+  ⍝ e.g. Foo -> Foo-1, foo -> foo-0)
+   ⍙_CC←'-',2 8 ⍙EZBase ⍙_T ⍝ 2: Binary, 8: Octal
 :Else ⋄ ⍙_CC←'' ⍝ No case code
 :EndIf
 
